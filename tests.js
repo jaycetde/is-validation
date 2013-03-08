@@ -32,9 +32,18 @@ var tests = {
     fail: []
   },
   url: {
-    pass: [],
-    fail: []
+    pass: [['http://www.google.com']],
+    fail: [['not a url'], ['http://notopleveldomain/with/a/path.jpg'], ['https://address.com/badchars/<>@']]
   }
+};
+
+exports.initializedCorrectly = function (unit) {
+  
+  unit.ok(is.valid(), "is valid");
+  unit.equal(is.failures(), 0, "has no failures");
+
+  unit.done();
+
 };
 
 exports.static = function (unit) {
@@ -42,11 +51,11 @@ exports.static = function (unit) {
     if (tests.hasOwnProperty(test)) {
       
       tests[test].pass.forEach(function (args) {
-        unit.ok(is[test].apply(null, args));
+        unit.ok(is[test].apply(null, args), test + ' tested against ' + JSON.stringify(args));
       });
 
       tests[test].fail.forEach(function (args) {
-        unit.ok(!is[test].apply(null, args));
+        unit.ok(!is[test].apply(null, args), test + ' tested against ' + JSON.stringify(args));
       });
 
     }
@@ -91,5 +100,26 @@ exports.invalidChains = function (unit) {
     .lt(10);
 
   unit.equal(is.failures(), 3);
+
+  unit.done();
+
+};
+
+exports.instanceTest = function (unit) {
+  
+  is.clear();
+
+  var isInst = is.create();
+
+  unit.notStrictEqual(is, isInst);
+
+  isInst.that(10, 'Number')
+    .gt(20);
+
+  unit.equal(isInst.failures(), 1);
+
+  unit.notEqual(is.failures(), isInst.failures());
+
+  unit.done();
 
 };
