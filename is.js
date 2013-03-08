@@ -16,6 +16,15 @@ var Chain = function (parent, val, name) {
 
 };
 
+Chain.prototype.prop = function (prop, name) {
+  var p = new Chain(this._parent, this._val[prop], name || this._name + ' ' + prop);
+  p._up = this;
+  return p;
+};
+Chain.prototype.up = function () {
+  return this._up;
+};
+
 var that = function (val, name) {
   if (!(this instanceof Is)) {
     throw new Error('Not an instance');
