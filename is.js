@@ -19,10 +19,16 @@ var Chain = function (parent, val, name) {
 Chain.prototype.prop = function (prop, name) {
   var p = new Chain(this._parent, this._val[prop], name || this._name + ' ' + prop);
   p._up = this;
+  if (typeof(this._val[prop]) === "undefined") {
+    p._bypass = true;
+  }
   return p;
 };
 Chain.prototype.up = function () {
   return this._up;
+};
+Chain.prototype.val = function () {
+  return this._val;
 };
 
 var that = function (val, name) {
@@ -30,7 +36,7 @@ var that = function (val, name) {
     throw new Error('Not an instance');
   }
 
-  return new Chain(this, val, name);
+  return new Chain(this, val, name || String(val));
 
 };
 
@@ -43,11 +49,26 @@ Is.prototype.addTest = function (name, fn) {
     return true;
   };
   Chain.prototype[name] = function () {
+    if (this._bypass) {
+      return this;
+    }
     var args = Array.prototype.slice.call(arguments)
       , response = fn.apply(null, [this._val].concat(args));
     if (typeof(response) === "string") {
       this._parent.addError(this._name, response);
     }
+    return this;
+  };
+};
+Is.prototype.addSanitation = function (name, fn, failureVal) {
+  Is.prototype[name] = fn;
+  Chain.prototype[name] = function () {
+    var args = Array.prototype.slice.call(arguments)
+      , val = fn.apply(null, [this._val].concat(args));
+    if (typeof(failureVal) !== "undefined" && val === failureVal) {
+      this._bypass = true;
+    }
+    this._val = val;
     return this;
   };
 };
