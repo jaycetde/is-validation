@@ -1,0 +1,18 @@
+{
+  "author": "Jayce Pulsipher <jaycemp@gmail.com>",
+  "name": "",
+  "description": "",
+  "version": "",
+  "license": "",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": ""
+  },
+  "keywords": [],
+  "dependencies": {},
+  "engines": {
+    "node": "*"
+  },
+  "main": "is.js"
+}
