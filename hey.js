@@ -1,6 +1,8 @@
 'use strict';
 
-var Hey = function () {
+var validators = require('./validators');
+
+var Is = function () {
   this.clear();
 };
 
@@ -14,8 +16,8 @@ var Chain = function (parent, val, name) {
 
 };
 
-var is = function (val, name) {
-  if (!(this instanceof Hey)) {
+var that = function (val, name) {
+  if (!(this instanceof Is)) {
     throw new Error('Not an instance');
   }
 
@@ -23,9 +25,9 @@ var is = function (val, name) {
 
 };
 
-Hey.prototype.is = is;
-Hey.prototype.addTest = function (name, fn) {
-  Hey.prototype[name] = function () {
+Is.prototype.that = that;
+Is.prototype.addTest = function (name, fn) {
+  Is.prototype[name] = function () {
     if (typeof(fn.apply(null, arguments)) === "string") {
       return false;
     }
@@ -40,7 +42,7 @@ Hey.prototype.addTest = function (name, fn) {
     return this;
   };
 };
-Hey.prototype.addError = function (name, message) {
+Is.prototype.addError = function (name, message) {
   if (!this._errors[name]) {
     this._errors[name] = [];
   }
@@ -49,45 +51,36 @@ Hey.prototype.addError = function (name, message) {
     this._errors[name].push(message);
   }
 };
-Hey.prototype.errors = function () {
+Is.prototype.errors = function () {
   return this._errors;
 };
-Hey.prototype.clear = function () {
+Is.prototype.failures = function () {
+  return this._failures;
+};
+Is.prototype.clear = function () {
   this._errors = {};
   this._failures = 0;
   return this;
 };
-Hey.prototype.valid = function () {
+Is.prototype.valid = function () {
   return this._failures === 0;
 };
-Hey.prototype.raise = function () {
+Is.prototype.raise = function () {
   var errors = this._errors;
   if (this._failures > 0) {
     this.clear();
     throw errors;
   }
 };
-Hey.prototype.create = function () {
-  return new Hey();
+Is.prototype.create = function () {
+  return new Is();
 };
 
-var hey = module.exports = new Hey();
+var hey = module.exports = new Is();
 
-var builtIns = {
-  'lt': function (val, limit) {
-    if (!(val < limit)) {
-      return 'less than ' + limit;
-    }
-  },
-  'gt': function (val, limit) {
-    if (!(val > limit)) {
-      return 'greater than ' + limit;
-    }
-  }
-};
 
-for (var prop in builtIns) {
-  if (builtIns.hasOwnProperty(prop)) {
-    hey.addTest(prop, builtIns[prop]);
+for (var name in validators) {
+  if (validators.hasOwnProperty(name)) {
+    hey.addTest(name, validators[name]);
   }
 }
