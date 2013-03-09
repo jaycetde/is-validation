@@ -3,10 +3,6 @@
 var is = require('./is');
 
 var tests = {
-  str: {
-    pass: [['hello'], ['world']],
-    fail: [[123], [true], [false]]
-  },
   num: {
     pass: [[123], [456.789], [-12], [13e5], [-13e-6]],
     fail: [['hello'], [true], [false], ['12'], [[]], [{}], ['']]
@@ -68,7 +64,6 @@ exports.validChains = function (unit) {
   is.clear();
 
   is.that('example@domain.com', 'Email')
-    .str()
     .email();
 
   is.that(20, 'Twenty')
@@ -87,7 +82,6 @@ exports.invalidChains = function (unit) {
   is.clear();
 
   is.that('invalid email address', 'Email')
-    .str()
     .email();
 
   unit.ok(!is.valid());
@@ -123,3 +117,5 @@ exports.instanceTest = function (unit) {
   unit.done();
 
 };
+
+

@@ -1,24 +1,57 @@
 'use strict';
 
-var validators = require('./validators');
+var validators = require('./validators')
+  , manipulators = require('./manipulators');
+
+var formatStr = function () {
+  var args = Array.prototype.slice.call(arguments)
+    , str = args.shift()
+    , i = 0;
+  return str.replace(/\{([0-9]*)\}/g, function (m, argI) {
+		argI = argI || i;
+		i += 1;
+    return typeof(args[argI]) !== 'undefined' ? args[argI] : '';
+  });
+};
+
+var stringListJoin = function (arr) {
+
+	if (arr.length === 1) {
+		return arr[0];
+	}
+
+	if (arr.length === 2) {
+		return arr.join(' and ');
+	}
+
+	if (arr.length >= 3) {
+		return arr.slice(0, arr.length - 1).join(', ') + ', and ' + arr[arr.length - 1];
+	}
+
+};
 
 var Is = function () {
   this.clear();
 };
 
-var Chain = function (parent, val, name) {
+var Chain = function (val, name) {
   
-  this._parent = parent;
   this._val = val;
   this._name = name;
+  this._registered = [];
+  
+  this.clear();
 
   return this;
 
 };
 
+Chain.prototype.errorFormat = "{0} must {1}";
+Chain.prototype.propFormat = "have a {0} which must {1}";
 Chain.prototype.prop = function (prop, name) {
-  var p = new Chain(this._parent, this._val[prop], name || this._name + ' ' + prop);
+  var p = new Chain(this._val[prop], name || prop);
   p._up = this;
+  this._registered.push(p);
   if (typeof(this._val[prop]) === "undefined") {
     p._bypass = true;
   }
@@ -30,17 +63,41 @@ Chain.prototype.up = function () {
 Chain.prototype.val = function () {
   return this._val;
 };
+Chain.prototype.success = function () {
+  return this._errors.length === 0;
+};
+Chain.prototype.clear = function () {
+  this._errors = [];
+  return this;
+};
+Chain.prototype.addError = function (msg) {
+  this._errors.push(msg);
+  return this;
+};
+Chain.prototype.errorList = function () {
+	var i, errs = this._errors.slice(0);
+	for (i = 0; i < this._registered.length; i += 1) {
+		errs.push(formatStr(this.propFormat, this._registered[i]._name, this._registered[i].errorList()));
+	}
+	return stringListJoin(errs);
+};
+Chain.prototype.errorMessage = function () {
+	var list = this.errorList();
+	return formatStr(this.errorFormat, this._name, list);
+};
 
-var that = function (val, name) {
+Is.prototype.that = function (val, name) {
+  
   if (!(this instanceof Is)) {
     throw new Error('Not an instance');
   }
 
-  return new Chain(this, val, name || String(val));
+  var c = new Chain(val, name);
+  c._parent = this;
+
+  return c;
 
 };
-
-Is.prototype.that = that;
 Is.prototype.addTest = function (name, fn) {
   Is.prototype[name] = function () {
     if (typeof(fn.apply(null, arguments)) === "string") {
@@ -55,18 +112,22 @@ Is.prototype.addTest = function (name, fn) {
     var args = Array.prototype.slice.call(arguments)
       , response = fn.apply(null, [this._val].concat(args));
     if (typeof(response) === "string") {
-      this._parent.addError(this._name, response);
+      this._errors.push(response);
+      if (this._parent) {
+        this._parent.addError(this._name, response);
+      }
     }
     return this;
   };
 };
-Is.prototype.addSanitation = function (name, fn, failureVal) {
+Is.prototype.addCast = function (name, fn) {
   Is.prototype[name] = fn;
   Chain.prototype[name] = function () {
     var args = Array.prototype.slice.call(arguments)
       , val = fn.apply(null, [this._val].concat(args));
-    if (typeof(failureVal) !== "undefined" && val === failureVal) {
+    if (typeof(fn.failVal) !== "undefined" && val === fn.failVal) {
       this._bypass = true;
+      this.addError(fn.failMessage || "Generic error message");
     }
     this._val = val;
     return this;
@@ -106,11 +167,16 @@ Is.prototype.create = function () {
   return new Is();
 };
 
-var hey = module.exports = new Is();
+var name, is = module.exports = new Is();
 
-
-for (var name in validators) {
+for (name in validators) {
   if (validators.hasOwnProperty(name)) {
-    hey.addTest(name, validators[name]);
+    is.addTest(name, validators[name]);
+  }
+}
+
+for (name in manipulators) {
+  if (manipulators.hasOwnProperty(name)) {
+    is.addCast(name, manipulators[name]);
   }
 }
