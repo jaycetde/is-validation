@@ -1,0 +1,21 @@
+#!/usr/bin/env node
+
+try {
+
+	var nodeunit = require('nodeunit')
+	, assertExtras = require('./assert-extras');
+
+} catch (e) {
+	console.log("Cannot find nodeunit module.");
+	console.log("You can download submodules for this project by doing:");
+	console.log("");
+	console.log("    git submodule init");
+	console.log("    git submodule update");
+	console.log("");
+	process.exit();
+}
+
+process.chdir(__dirname);
+
+nodeunit.assert = assertExtras;
+nodeunit.reporters.default.run(['tests.js']);

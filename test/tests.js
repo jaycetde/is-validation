@@ -1,6 +1,7 @@
 'use strict';
 
-var is = require('./is');
+var testCase = require('nodeunit').testCase
+	, is = require('../is');
 
 var tests = {
   numeric: {
@@ -192,7 +193,7 @@ exports.intCoercion = function (unit) {
 		.num();
 	
 	unit.ok(!i2.valid());
-	// unit.isNaN(i2.val()); Add high level methods to assert
+	unit.isNaN(i2.val()); // Add high level methods to assert
 	
 	unit.done();
 	
@@ -250,3 +251,5 @@ exports.throwing = function (unit) {
 	unit.done();
 
 };
+
+module.exports = testCase(exports);
