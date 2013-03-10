@@ -1,34 +1,7 @@
 'use strict';
 
-var validators = require('./validators')
-  , manipulators = require('./manipulators');
-
-var formatStr = function () {
-  var args = Array.prototype.slice.call(arguments)
-    , str = args.shift()
-    , i = 0;
-  return str.replace(/\{([0-9]*)\}/g, function (m, argI) {
-		argI = argI || i;
-		i += 1;
-    return typeof(args[argI]) !== 'undefined' ? args[argI] : '';
-  });
-};
-
-var stringListJoin = function (arr) {
-
-	if (arr.length === 1) {
-		return arr[0];
-	}
-
-	if (arr.length === 2) {
-		return arr.join(' and ');
-	}
-
-	if (arr.length >= 3) {
-		return arr.slice(0, arr.length - 1).join(', ') + ', and ' + arr[arr.length - 1];
-	}
-
-};
+var builtIns = require('./builtins')
+	, helpers = require('./helpers');
 
 var Is = function () {
   this.clear();
@@ -68,22 +41,44 @@ Chain.prototype.success = function () {
 };
 Chain.prototype.clear = function () {
   this._errors = [];
+	this._testCount = 0;
+	this._errCount = 0;
   return this;
 };
 Chain.prototype.addError = function (msg) {
   this._errors.push(msg);
+	this._errCount += 1;
   return this;
 };
 Chain.prototype.errorList = function () {
 	var i, errs = this._errors.slice(0);
 	for (i = 0; i < this._registered.length; i += 1) {
-		errs.push(formatStr(this.propFormat, this._registered[i]._name, this._registered[i].errorList()));
+		if (this._registered[i].errCount() > 0) {
+			errs.push(helpers.formatStr(this.propFormat, this._registered[i]._name, this._registered[i].errorList()));
+		}
 	}
-	return stringListJoin(errs);
+	return helpers.stringListJoin(errs);
 };
 Chain.prototype.errorMessage = function () {
 	var list = this.errorList();
-	return formatStr(this.errorFormat, this._name, list);
+	return helpers.formatStr(this.errorFormat, this._name, list);
+};
+Chain.prototype.testCount = function () {
+	var i, count = this._testCount;
+	for (i = 0; i < this._registered.length; i += 1) {
+		count += this._registered[i].testCount();
+	}
+	return count;
+};
+Chain.prototype.errCount = function () {
+	var i, count = this._errCount;
+	for (i = 0; i < this._registered.length; i += 1) {
+		count += this._registered[i].errCount();
+	}
+	return count;
+};
+Chain.prototype.valid = function () {
+	return this.errCount() === 0;
 };
 
 Is.prototype.that = function (val, name) {
@@ -92,8 +87,8 @@ Is.prototype.that = function (val, name) {
     throw new Error('Not an instance');
   }
 
-  var c = new Chain(val, name);
-  c._parent = this;
+  var c = new Chain(val, name || 'value');
+	this._registered.push(c);
 
   return c;
 
@@ -112,11 +107,9 @@ Is.prototype.addTest = function (name, fn) {
     var args = Array.prototype.slice.call(arguments)
       , response = fn.apply(null, [this._val].concat(args));
     if (typeof(response) === "string") {
-      this._errors.push(response);
-      if (this._parent) {
-        this._parent.addError(this._name, response);
-      }
+      this.addError(response);
     }
+		this._testCount += 1;
     return this;
   };
 };
@@ -142,25 +135,38 @@ Is.prototype.addError = function (name, message) {
     this._errors[name].push(message);
   }
 };
-Is.prototype.errors = function () {
-  return this._errors;
+Is.prototype.errorMessages = function () {
+  var i, messages = [];
+	for (i = 0; i < this._registered.length; i += 1) {
+		messages.push(this._registered[i].errorMessage());
+	}
+	return messages;
 };
-Is.prototype.failures = function () {
-  return this._failures;
+Is.prototype.testCount = function () {
+	var i, count = 0;
+	for (i = 0; i < this._registered.length; i += 1) {
+		count += this._registered[i].testCount();
+	}
+	return count;
+};
+Is.prototype.errCount = function () {
+  var i, count = 0;
+	for (i = 0; i < this._registered.length; i += 1) {
+		count += this._registered[i].errCount();
+	}
+	return count;
 };
 Is.prototype.clear = function () {
-  this._errors = {};
-  this._failures = 0;
+  this._registered = [];
   return this;
 };
 Is.prototype.valid = function () {
-  return this._failures === 0;
+  return this.errCount() === 0;
 };
 Is.prototype.raise = function () {
-  var errors = this._errors;
-  if (this._failures > 0) {
+  if (this.errCount() > 0) {
     this.clear();
-    throw errors;
+    throw new Error("has errors"); // TODO create custom error object
   }
 };
 Is.prototype.create = function () {
@@ -169,14 +175,14 @@ Is.prototype.create = function () {
 
 var name, is = module.exports = new Is();
 
-for (name in validators) {
-  if (validators.hasOwnProperty(name)) {
-    is.addTest(name, validators[name]);
+for (name in builtIns.validators) {
+  if (builtIns.validators.hasOwnProperty(name)) {
+    is.addTest(name, builtIns.validators[name]);
   }
 }
 
-for (name in manipulators) {
-  if (manipulators.hasOwnProperty(name)) {
-    is.addCast(name, manipulators[name]);
+for (name in builtIns.manipulators) {
+  if (builtIns.manipulators.hasOwnProperty(name)) {
+    is.addCast(name, builtIns.manipulators[name]);
   }
 }

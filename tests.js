@@ -3,9 +3,9 @@
 var is = require('./is');
 
 var tests = {
-  num: {
-    pass: [[123], [456.789], [-12], [13e5], [-13e-6]],
-    fail: [['hello'], [true], [false], ['12'], [[]], [{}], ['']]
+  numeric: {
+    pass: [[123], [456.789], [-12], [13e5], [-13e-6], ['12'], ['-123.456'], ['2.54e3']],
+    fail: [['hello'], [true], [false], [[]], [{}], ['']]
   },
   lt: {
     pass: [[0, 1], [100, 200], ['a', 'b']],
@@ -16,34 +16,64 @@ var tests = {
     fail: [[0, 1], [100, 200], [1, 1], ['a', 'b']]
   },
   lte: {
-    pass: [],
-    fail: []
+    pass: [[0, 1], [1, 1], [100, 200], ['a', 'b'], ['a', 'a']],
+    fail: [[2, 1], [200, 100], ['b', 'a']]
   },
   gte: {
-    pass: [],
-    fail: []
+    pass: [[1, 0], [1, 1], [200, 100], ['b', 'a'], ['a', 'a']],
+    fail: [[1, 2], [100, 200], ['a', 'b']]
   },
   email: {
-    pass: [],
-    fail: []
+    pass: [['niceandsimple@example.com'], ['very.common@example.com'] ],//, ['a.little.lengthy.but.fine@dept.example.com'], ['disposable.style.email.with+symbol@example.com'], ['user@[IPv6:2001:db8:1ff::a0b:dbd0]'], ['"much.more unusual"@example.com'], ['"very.unusual.@.unusual.com"@example.com'], ['"very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual"@strange.example.com'], ['postbox@com'], ['admin@mailserver1'], ['!#$%&\'*+-/=?^_`{}|~@example.org'], ['"()<>[]:,;@\\\"!#$%&\'*+-/=?^_`{}| ~.a"@example.org'], ['" "@example.org']],
+    fail: [['not an email'], ['Abc.example.com'], ['A@b@c@example.com'], ['a"b(c)d,e:f;g<h>i[j\\k]l@example.com'], ['just"not"right@example.com'], ['this is"not\\allowed@example.com'], ['this\\ still\\"not\\\\allowed@example.com']]
   },
   url: {
     pass: [['http://www.google.com']],
     fail: [['not a url'], ['http://notopleveldomain/with/a/path.jpg'], ['https://address.com/badchars/<>@']]
-  }
+  },
+	match: {
+		pass: [],
+		fail: []
+	},
+	eq: {
+		pass: [['abc', 'abc'], ['123', 123], [true, 1], [false, 0]],
+		fail: [['abc', 'def'], [123, '456'], [true, 0], [false, 1]]
+	},
+	ip: {
+		pass: [['172.16.254.1'], ['0.0.0.0'], ['255.255.255.255']],
+		fail: [['172.16.254.256'], [''], ['abc'], [true], [false], ['300.300.300.300']]
+	},
+	alpha: {
+		pass: [['abcdefghijklmnopqrstuvwxyz'], ['aBcDeF'], ['helloworld']],
+		fail: [[''], ['abc123'], ['hello world']]
+	},
+	alphaNumeric: {
+		pass: [['abcdefghijklmnopqrstuvwxyz0123456789'], ['aBcDeF0123'], ['helloworld2']],
+		fail: [[''], ['abc123!'], ['hello world'], ['!@#%$^&*']]
+	},
+	date: {
+		pass: [['Aug 9, 1995'], ['Wed, 09 Aug 1995 00:00:00 GMT'], ['Thu, 01 Jan 1970 00:00:00 GMT-0400'], ['1994-11-05T08:15:30-05:00'], ['1994-11-05T13:15:30Z'], ['1995-09-09'], ['1995-9-9'], ['1995/09/09 10:10:10']],
+		fail: [[1336802400000], ['Aug 32, 1995'], ['notadate']]
+	}
+};
+
+tests.notMatch = {
+	pass: tests.match.fail,
+	fail: tests.match.pass
 };
 
 exports.initializedCorrectly = function (unit) {
   
   unit.ok(is.valid(), "is valid");
-  unit.equal(is.failures(), 0, "has no failures");
+  unit.equal(is.errCount(), 0, "has no failures");
 
   unit.done();
 
 };
 
-exports.static = function (unit) {
-  for (var test in tests) {
+exports.staticMethods = function (unit) {
+	var test;
+  for (test in tests) {
     if (tests.hasOwnProperty(test)) {
       
       tests[test].pass.forEach(function (args) {
@@ -86,14 +116,14 @@ exports.invalidChains = function (unit) {
 
   unit.ok(!is.valid());
 
-  unit.equal(is.failures(), 1);
+  unit.equal(is.errCount(), 1);
 
   is.that(20, 'Twenty')
     .num()
     .gt(30)
     .lt(10);
 
-  unit.equal(is.failures(), 3);
+  unit.equal(is.errCount(), 3);
 
   unit.done();
 
@@ -110,12 +140,38 @@ exports.instanceTest = function (unit) {
   isInst.that(10, 'Number')
     .gt(20);
 
-  unit.equal(isInst.failures(), 1);
+  unit.equal(isInst.errCount(), 1);
 
-  unit.notEqual(is.failures(), isInst.failures());
+  unit.notEqual(is.errCount(), isInst.errCount());
 
   unit.done();
 
 };
 
+exports.countsTest = function (unit) {
 
+	is.clear();
+
+	unit.equal(is.errCount(), 0);
+	unit.equal(is.testCount(), 0);
+
+	var c1 = is.that(100)
+		.num()
+		.gt(200)
+	
+		, c2 = is.that(400)
+		.num()
+		.gt(200);
+	
+	unit.equal(c1.errCount(), 1);
+	unit.equal(c1.testCount(), 2);
+
+	unit.equal(c2.errCount(), 0);
+	unit.equal(c2.testCount(), 2);
+
+	unit.equal(is.errCount(), 1);
+	unit.equal(is.testCount(), 4);
+
+	unit.done();
+
+};
