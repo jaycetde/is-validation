@@ -30,6 +30,13 @@ Chain.prototype.prop = function (prop, name) {
   }
   return p;
 };
+Chain.prototype.manip = function (fn, name) {
+	var val = fn.call(this, this._val)
+		, c = new Chain(val, name || 'manipulated value');
+	c._up = this;
+	this._registered.push(c);
+	return p;
+};
 Chain.prototype.up = function () {
   return this._up;
 };
@@ -116,6 +123,9 @@ Is.prototype.addTest = function (name, fn) {
 Is.prototype.addCast = function (name, fn) {
   Is.prototype[name] = fn;
   Chain.prototype[name] = function () {
+  	if (this._bypass) {
+  		return this;
+  	}
     var args = Array.prototype.slice.call(arguments)
       , val = fn.apply(null, [this._val].concat(args));
     if (typeof(fn.failVal) !== "undefined" && val === fn.failVal) {

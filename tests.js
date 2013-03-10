@@ -175,3 +175,44 @@ exports.countsTest = function (unit) {
 	unit.done();
 
 };
+
+exports.intCoercion = function (unit) {
+	
+	is.clear();
+	
+	var i1 = is.that('123', 'Valid int')
+		.toInt()
+		.num();
+	
+	unit.ok(i1.valid());
+	unit.equal(i1.val(), 123);
+	
+	var i2 = is.that('abc', 'Invalid int')
+		.toInt()
+		.num();
+	
+	unit.ok(!i2.valid());
+	// unit.isNaN(i2.val()); Add high level methods to assert
+	
+	unit.done();
+	
+};
+
+exports.manipulation = function (unit) {
+	
+	is.clear();
+	
+	var m1 = is.that(2, 'Two')
+		.eq(2)
+		.manip(function (val) {
+			return val * 2;
+		}, 'Two times two')
+			.eq(4);
+	
+	unit.ok(m1.valid());
+	unit.equal(m1.val(), 4);
+	unit.equal(m1.up().val(), 2);
+	
+	unit.done();
+	
+};
