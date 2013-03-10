@@ -139,13 +139,13 @@ var manipulators = exports.manipulators = {
 manipulators.toDecimal = function (val) {
 	return parseFloat(val);
 };
-manipulators.toDecimal.failVal = NaN;
+manipulators.toDecimal.failVal = isNaN;
 manipulators.toDecimal.failMessage = 'be a decimal';
 manipulators.toInt = function (val, radix) {
 	radix = radix || 10;
 	return parseInt(val, radix);
 };
-manipulators.toInt.failVal = NaN;
+manipulators.toInt.failVal = isNaN;
 manipulators.toInt.failMessage = 'be an integer';
 
 manipulators.toNum = function (val) {
@@ -154,11 +154,11 @@ manipulators.toNum = function (val) {
 	}
 	return Number(val);
 };
-manipulators.toNum.failVal = NaN;
+manipulators.toNum.failVal = isNaN;
 manipulators.toNum.failMessage = 'be a number';
 
 manipulators.toDate = function (val) {
 	return Date.parse(val);
 };
-manipulators.toDate.failVal = NaN;
+manipulators.toDate.failVal = isNaN;
 manipulators.toDate.failMessage = 'be a valid date';

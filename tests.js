@@ -216,3 +216,37 @@ exports.manipulation = function (unit) {
 	unit.done();
 	
 };
+
+exports.throwing = function (unit) {
+
+	is.clear();
+
+	var c1 = is.that('abc', 'Invalid number');
+
+	unit.throws(function () {
+		c1.num().throwErr();
+	});
+
+	unit.ok(c1.valid());
+	unit.ok(is.valid());
+
+	var c2 = is.that('123', 'Valid number');
+	
+	unit.throws(function () {
+		c2.toInt().gt(300);
+		is.throwErrs();
+	});
+
+	unit.ok(!c2.valid());
+	unit.ok(is.valid());
+
+	c2.clear();
+
+	unit.doesNotThrow(function () {
+		c2.toInt().gt(0);
+		c2.throwErr();
+	});
+
+	unit.done();
+
+};
