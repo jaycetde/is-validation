@@ -11,6 +11,23 @@ var emailReg = /^([a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+|"([a-zA-Z0-9()<>\[\]:,;@\\!
 	, objProto = Object.prototype
 ;
 
+var strictFn = function (typeStr, defaultMessage) {
+	return function (val, msg) {
+		if (objProto.toString.call(val) !== '[object ' + typeStr + ']') {
+			return msg || defaultMessage;
+		}
+	};
+};
+
+var strictTests = {
+	'sStr': ['String', 'be a string'],
+	'sNum': ['Number', 'be a number'],
+	'sFn': ['Function', 'be a function'],
+	'sArgs': ['Arguments', 'be arguments'],
+	'sDate': ['Date', 'be a date'],
+	'sRegExp': ['RegExp', 'be a regular expression']
+};
+
 var validators = exports.validators = {
 	
 	num: function (val, msg) {
@@ -105,21 +122,12 @@ var validators = exports.validators = {
 
 };
 
-var strictFn = function (name, typeStr, defaultMessage) {
-	varlidators[name] = function (val, msg) {
-		if (objProto.toString.call(val) === '[object ' + typeStr + ']') {
-			return msg || defaultMessage;
-		}
-	};
-};
+var prop;
 
-var strictTests = [
-	['sStr', 'String', 'be a string'],
-	['sNum', 'Number', 'be a number']
-];
-
-for (var i = 0; i < strictTests.length; i += 1) {
-	strictFn.apply(null, strictTests[i]);
+for (prop in strictTests) {
+	if (strictTests.hasOwnProperty(prop)) {
+		validators[prop] = strictFn.apply(null, strictTests[prop]);
+	}
 }
 
 var manipulators = exports.manipulators = {

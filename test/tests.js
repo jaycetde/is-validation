@@ -4,7 +4,7 @@ var testCase = require('nodeunit').testCase
 	, is = require('../is');
 
 var tests = {
-  numeric: {
+  num: {
     pass: [[123], [456.789], [-12], [13e5], [-13e-6], ['12'], ['-123.456'], ['2.54e3']],
     fail: [['hello'], [true], [false], [[]], [{}], ['']]
   },
