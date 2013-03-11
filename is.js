@@ -328,18 +328,10 @@ Is.prototype.addManip = function (name, fn) {
 };
 
 /**
- * Used internally to add errors to the queue
+ * Creates a list of error messages
  *
+ * @return {array} List of human-readable error messages
  */
-Is.prototype.addError = function (name, message) {
-	if (!this._errors[name]) {
-		this._errors[name] = [];
-	}
-	if (this._errors[name].indexOf(message) === -1) {
-		this._failures += 1;
-		this._errors[name].push(message);
-	}
-};
 Is.prototype.errorMessages = function () {
 	var i, messages = [];
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -347,6 +339,12 @@ Is.prototype.errorMessages = function () {
 	}
 	return messages;
 };
+
+/**
+ * Adds up all tests ran in this instance
+ *
+ * @return {number} The number of tests ran
+ */
 Is.prototype.testCount = function () {
 	var i, count = 0;
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -354,6 +352,12 @@ Is.prototype.testCount = function () {
 	}
 	return count;
 };
+
+/**
+ * Adds up all errors occured in this instance
+ *
+ * @return {number} The number of errors
+ */
 Is.prototype.errCount = function () {
 	var i, count = 0;
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -361,13 +365,31 @@ Is.prototype.errCount = function () {
 	}
 	return count;
 };
+
+/**
+ * Reset all errors and tests recoreded
+ *
+ * @return {Is} this
+ */
 Is.prototype.clear = function () {
 	this._registered = [];
 	return this;
 };
+
+/**
+ * True if the instance has no errors
+ *
+ * @return {boolean} Has no errors
+ */
 Is.prototype.valid = function () {
 	return this.errCount() === 0;
 };
+
+/**
+ * Throws an exception if there are any errors
+ *
+ * @return {Is} this
+ */
 Is.prototype.throwErrs = function () {
 	if (this.errCount() > 0) {
 		var msgs = this.errorMessages();
@@ -376,6 +398,12 @@ Is.prototype.throwErrs = function () {
 	}
 	return this;
 };
+
+/**
+ * Creates and returns a new instance of Is
+ *
+ * @return {Is} A new instance
+ */
 Is.prototype.create = function () {
 	return new Is();
 };

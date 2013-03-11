@@ -7,17 +7,15 @@ var emailReg = /^([a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+|"([a-zA-Z0-9()<>\[\]:,;@\\!
 	, ipReg = /^(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/
 	, alphaReg = /^[a-z]+$/i
 	, alphaNumericReg = /^[a-z0-9]+$/i
-	, regWhitespace = '\\r\\n\\t\\s';
+	, regWhitespace = '\\r\\n\\t\\s'
+	, objProto = Object.prototype
+;
 
 var validators = exports.validators = {
+	
 	num: function (val, msg) {
-		if (typeof(val) !== "number") {
-			return msg || 'be a number';
-		}
-	},
-	numeric: function (val, msg) {
 		if (val === true || val === false || exports.manipulators.trim(val) === "" || isNaN(Number(val))) {
-			return msg || 'be a numeric';
+			return msg || 'be numeric';
 		}
 	},
 
@@ -103,15 +101,26 @@ var validators = exports.validators = {
 		if (isNaN(Date.parse(val))) {
 			return msg || 'be a valid date';
 		}
-	},
-
-	sStr: function (val, msg) {
-		if (Object.prototype.toString.call(val) === '[object String]') {
-			return msg || 'be a string';
-		}
 	}
 
 };
+
+var strictFn = function (name, typeStr, defaultMessage) {
+	varlidators[name] = function (val, msg) {
+		if (objProto.toString.call(val) === '[object ' + typeStr + ']') {
+			return msg || defaultMessage;
+		}
+	};
+};
+
+var strictTests = [
+	['sStr', 'String', 'be a string'],
+	['sNum', 'Number', 'be a number']
+];
+
+for (var i = 0; i < strictTests.length; i += 1) {
+	strictFn.apply(null, strictTests[i]);
+}
 
 var manipulators = exports.manipulators = {
 	trim: function (str, chars) {
