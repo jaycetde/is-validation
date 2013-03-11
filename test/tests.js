@@ -25,7 +25,7 @@ var tests = {
     fail: [[1, 2], [100, 200], ['a', 'b']]
   },
   email: {
-    pass: [['niceandsimple@example.com'], ['very.common@example.com'] ],//, ['a.little.lengthy.but.fine@dept.example.com'], ['disposable.style.email.with+symbol@example.com'], ['user@[IPv6:2001:db8:1ff::a0b:dbd0]'], ['"much.more unusual"@example.com'], ['"very.unusual.@.unusual.com"@example.com'], ['"very.(),:;<>[]\".VERY.\"very@\\ \"very\".unusual"@strange.example.com'], ['postbox@com'], ['admin@mailserver1'], ['!#$%&\'*+-/=?^_`{}|~@example.org'], ['"()<>[]:,;@\\\"!#$%&\'*+-/=?^_`{}| ~.a"@example.org'], ['" "@example.org']],
+    pass: [['niceandsimple@example.com'], ['very.common@example.com'], ['a.little.lengthy.but.fine@dept.example.com'], ['disposable.style.email.with+symbol@example.com'], /*['user@[IPv6:2001:db8:1ff::a0b:dbd0]'],*/ ['"much.more unusual"@example.com'], ['"very.unusual.@.unusual.com"@example.com'], ['"very.(),:;<>[]\\".VERY.\\"very@\\ \\"very\\".unusual"@strange.example.com'], ['!#$%&\'*+-/=?^_`{}|~@example.org'], ['"()<>[]:,;@\\\"!#$%&\'*+-/=?^_`{}| ~.a"@example.org'], ['" "@example.org'], ['ipdomain@64.233.161.83']], // Does not support IPv6 domain
     fail: [['not an email'], ['Abc.example.com'], ['A@b@c@example.com'], ['a"b(c)d,e:f;g<h>i[j\\k]l@example.com'], ['just"not"right@example.com'], ['this is"not\\allowed@example.com'], ['this\\ still\\"not\\\\allowed@example.com']]
   },
   url: {
