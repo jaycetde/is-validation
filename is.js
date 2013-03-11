@@ -3,20 +3,49 @@
 var builtIns = require('./builtins')
 	, helpers = require('./helpers');
 
-// Custom Exception Classes
+/**
+ * Exception that is thrown from a chain
+ *
+ * @constructor
+ * @this {ValidationException}
+ * @param {string} msg Constructed message of all error messages
+ */
 var ValidationException = function (msg) {
 	this.name = "ValidationException";
 	this.message = msg;
 };
+/**
+ * Exception that is thrown from is
+ *
+ * @constructor
+ * @this {ValidationsException}
+ * @param {array} msgs List of constructed error messages
+ */
 var ValidationsException = function (msgs) {
 	this.name = "ValidationsException";
 	this.messages = msgs;
 };
 
+/**
+ * Create a new instance of Is with private error queues
+ *
+ * @constructor
+ * @this {Is}
+ * @return {Is} Constructed instance
+ */
 var Is = function () {
 	this.clear();
+	return this;
 };
 
+/**
+ * Creates a chain instance
+ *
+ * @constructor
+ * @this {Chain}
+ * @param {!Object} val The value the chain is focused on
+ * @param {string} name A human-readable name of the value
+ */
 var Chain = function (val, name) {
 
 	this._val = val;
@@ -119,13 +148,13 @@ Chain.prototype.throwErr = function () {
 	return this;
 };
 
-Is.prototype.that = function (val, name) {
+Is.prototype.that = function (val, name, errorFormat) {
 
 	if (!(this instanceof Is)) {
 		throw new Error('Not an instance');
 	}
 
-	var c = new Chain(val, name || 'value');
+	var c = new Chain(val, name || 'value', errorFormat);
 	this._registered.push(c);
 
 	return c;
@@ -151,7 +180,7 @@ Is.prototype.addTest = function (name, fn) {
 		return this;
 	};
 };
-Is.prototype.addCast = function (name, fn) {
+Is.prototype.addManip = function (name, fn) {
 	Is.prototype[name] = fn;
 	Chain.prototype[name] = function () {
 		if (this._bypass) {
@@ -228,6 +257,6 @@ for (name in builtIns.validators) {
 
 for (name in builtIns.manipulators) {
 	if (builtIns.manipulators.hasOwnProperty(name)) {
-		is.addCast(name, builtIns.manipulators[name]);
+		is.addManip(name, builtIns.manipulators[name]);
 	}
 }

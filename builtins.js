@@ -103,6 +103,12 @@ var validators = exports.validators = {
 		if (isNaN(Date.parse(val))) {
 			return msg || 'be a valid date';
 		}
+	},
+
+	sStr: function (val, msg) {
+		if (Object.prototype.toString.call(val) === '[object String]') {
+			return msg || 'be a string';
+		}
 	}
 
 };
