@@ -35,7 +35,7 @@ Chain.prototype.prop = function (prop, name) {
 	var p = new Chain(this._val[prop], name || prop);
 	p._up = this;
 	this._registered.push(p);
-	if (typeof(this._val[prop]) === "undefined") {
+	if (this._bypass || typeof(this._val[prop]) === "undefined") {
 		p._bypass = true;
 	}
 	return p;
@@ -45,7 +45,20 @@ Chain.prototype.manip = function (fn, name) {
 	, c = new Chain(val, name || 'manipulated value');
 	c._up = this;
 	this._registered.push(c);
+	if (this._bypass) {
+		c._bypass = true;
+	}
 	return c;
+};
+Chain.prototype.stop = function () {
+	this._bypass = true;
+	return this;
+};
+Chain.prototype.stopIfErrs = function () {
+	if (!this.valid()) {
+		this._bypass = true;
+	}
+	return this;
 };
 Chain.prototype.up = function () {
 	return this._up;
