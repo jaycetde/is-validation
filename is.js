@@ -50,7 +50,6 @@ var Chain = function (val, name) {
 
 	this._val = val;
 	this._name = name;
-	this._registered = [];
 
 	this.clear();
 
@@ -58,8 +57,25 @@ var Chain = function (val, name) {
 
 };
 
+/**
+ * Default error format for top-level chains
+ * {0}: val name
+ * {1}: constructed error list
+ */
 Chain.prototype.errorFormat = "{0} must {1}";
+/**
+ * Default error format for non-top-level chains
+ * {0}: val name
+ * {1}: constructed error list
+ */
 Chain.prototype.propFormat = "have a {0} which must {1}";
+/**
+ * Creates a new chain focused on the property name of current chain
+ *
+ * @param {string} prop Name of property to change focus to
+ * @param {string} name A human readable name of the property
+ * @return {Chain} A new chain focused on property value
+ */
 Chain.prototype.prop = function (prop, name) {
 	var p = new Chain(this._val[prop], name || prop);
 	p._up = this;
@@ -69,6 +85,13 @@ Chain.prototype.prop = function (prop, name) {
 	}
 	return p;
 };
+/**
+ * Manipulates the current chain value using a supplied function
+ *
+ * @param {function} fn Accepts the val and returns the manipulated val
+ * @param {string} name Manipulated value name
+ * @return {Chain} A new chain focused on the manipulated value
+ */
 Chain.prototype.manip = function (fn, name) {
 	var val = fn.call(this, this._val)
 	, c = new Chain(val, name || 'manipulated value');
@@ -79,36 +102,87 @@ Chain.prototype.manip = function (fn, name) {
 	}
 	return c;
 };
+
+/**
+ * Bypasses all future tests and manipulations
+ *
+ * @return {Chain} this
+ */
 Chain.prototype.stop = function () {
 	this._bypass = true;
 	return this;
 };
+
+/**
+ * Stop bypassing future tests and manipulations
+ * 
+ * @return {Chain} this
+ */
+Chain.prototype.resume = function () {
+	this._bypass = false;
+	return this;
+};
+
+/**
+ * Starts Bypassing future tests and manipulations if any errors occured
+ *
+ * @return {Chain} this
+ */
 Chain.prototype.stopIfErrs = function () {
 	if (!this.valid()) {
-		this._bypass = true;
+		this.stop();
 	}
 	return this;
 };
+
+/**
+ * Provides access to previous chains of .prop and .manip
+ *
+ * @return {Chain} this
+ */
 Chain.prototype.up = function () {
 	return this._up;
 };
+
+/**
+ * Get the current manipulated value
+ * 
+ * @return {Object} The manipulated value
+ */
 Chain.prototype.val = function () {
 	return this._val;
 };
-Chain.prototype.success = function () {
-	return this._errors.length === 0;
-};
+
+/**
+ * Clears chain of all errors and children chains
+ *
+ * @return {Chain} this
+ */
 Chain.prototype.clear = function () {
+	this._registered = [];
 	this._errors = [];
 	this._testCount = 0;
 	this._errCount = 0;
 	return this;
 };
+
+/**
+ * Used internally if an error occurs in the chain
+ *
+ * @param {string} msg A formatted message describing the error
+ * @return {Chain} this
+ */
 Chain.prototype.addError = function (msg) {
 	this._errors.push(msg);
 	this._errCount += 1;
 	return this;
 };
+
+/**
+ * Used internally to construct the list of errors excluding the subject
+ *
+ * @return {string} Human-readable list of errors
+ */
 Chain.prototype.errorList = function () {
 	var i, errs = this._errors.slice(0);
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -118,10 +192,22 @@ Chain.prototype.errorList = function () {
 	}
 	return helpers.stringListJoin(errs);
 };
+
+/**
+ * Constructs a human-readable message describing all the errors in the chain
+ *
+ * @return {string} Human-readable list of errors
+ */
 Chain.prototype.errorMessage = function () {
 	var list = this.errorList();
 	return helpers.formatStr(this.errorFormat, this._name, list);
 };
+
+/**
+ * The number of tests that have been run in the chain
+ *
+ * @return {number} The number of tests ran
+ */
 Chain.prototype.testCount = function () {
 	var i, count = this._testCount;
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -129,6 +215,12 @@ Chain.prototype.testCount = function () {
 	}
 	return count;
 };
+
+/**
+ * The number of errors that have occured in the chain
+ *
+ * @return {number} The number of errors
+ */
 Chain.prototype.errCount = function () {
 	var i, count = this._errCount;
 	for (i = 0; i < this._registered.length; i += 1) {
@@ -136,9 +228,19 @@ Chain.prototype.errCount = function () {
 	}
 	return count;
 };
+
+/**
+ * @return {boolean} If the chain has no errors
+ */
 Chain.prototype.valid = function () {
 	return this.errCount() === 0;
 };
+
+/**
+ * Throws an exception if there are any errors in the chain
+ *
+ * @return {Chain} this
+ */
 Chain.prototype.throwErr = function () {
 	if (this.errCount() > 0) {
 		var msg = this.errorMessage();
@@ -148,18 +250,34 @@ Chain.prototype.throwErr = function () {
 	return this;
 };
 
-Is.prototype.that = function (val, name, errorFormat) {
+
+/**
+ * Creates a new chain and registers it to this instance of Is
+ *
+ * @param {Object} val The value used in the chain
+ * @param {string} name The name of the value used in the chain
+ * @return {Chain} A constructed chain object
+ */
+Is.prototype.that = function (val, name) {
 
 	if (!(this instanceof Is)) {
 		throw new Error('Not an instance');
 	}
 
-	var c = new Chain(val, name || 'value', errorFormat);
+	var c = new Chain(val, name || 'value');
 	this._registered.push(c);
 
 	return c;
 
 };
+
+/**
+ * Extends Is and Chain with a new test function
+ *
+ * @param {string} name The name the test will be available by
+ * @param {function} fn The test function. Returns undefined on success, error message on failure
+ * @return {Is} this
+ */
 Is.prototype.addTest = function (name, fn) {
 	Is.prototype[name] = function () {
 		if (typeof(fn.apply(null, arguments)) === "string") {
@@ -179,7 +297,16 @@ Is.prototype.addTest = function (name, fn) {
 		this._testCount += 1;
 		return this;
 	};
+	return this;
 };
+
+/**
+ * Extends Is and Chain with a new manipulation function
+ *
+ * @param {string} name The name the manipulation will be available by
+ * @param {function} fn The manipulation function. Returns manipulated value
+ * @return {Is} this
+ */
 Is.prototype.addManip = function (name, fn) {
 	Is.prototype[name] = fn;
 	Chain.prototype[name] = function () {
@@ -197,7 +324,13 @@ Is.prototype.addManip = function (name, fn) {
 		this._val = val;
 		return this;
 	};
+	return this;
 };
+
+/**
+ * Used internally to add errors to the queue
+ *
+ */
 Is.prototype.addError = function (name, message) {
 	if (!this._errors[name]) {
 		this._errors[name] = [];
