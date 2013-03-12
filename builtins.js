@@ -8,15 +8,28 @@ var emailReg = /^([a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+|"([a-zA-Z0-9()<>\[\]:,;@\\!
 	, alphaReg = /^[a-z]+$/i
 	, alphaNumericReg = /^[a-z0-9]+$/i
 	, regWhitespace = '\\r\\n\\t\\s'
-	, objProto = Object.prototype
 ;
 
+var validators = exports.validators = {};
+
+var num, lt, gt, lte, gte, bt, date, lObj, match, eq, sEq, sBool;
+
+var toInt, toDecimal, toDate, toNum;
+
 var strictFn = function (typeStr, defaultMessage) {
-	return function (val, msg) {
-		if (objProto.toString.call(val) !== '[object ' + typeStr + ']') {
-			return msg || defaultMessage;
-		}
+	var fn = function (val) {
+		return Object.prototype.toString.call(val) === '[object ' + typeStr + ']';
 	};
+	fn.failMessage = defaultMessage;
+	return fn;
+};
+
+var regExpFn = function (reg, defaultMessage) {
+	var fn = function (val) {
+		return reg.test(val);
+	};
+	fn.failMessage = defaultMessage;
+	return fn;
 };
 
 var strictTests = {
@@ -28,111 +41,85 @@ var strictTests = {
 	'sRegExp': ['RegExp', 'be a regular expression']
 };
 
-var validators = exports.validators = {
-	
-	num: function (val, msg) {
-		if (val === true || val === false || exports.manipulators.trim(val) === "" || isNaN(Number(val))) {
-			return msg || 'be numeric';
-		}
-	},
-
-	lt: function (val, limit, msg) {
-		if (!(val < limit)) {
-			return msg ? helpers.formatStr(msg, limit) : helpers.formatStr('be less than {}', limit);
-		}
-	},
-
-	gt: function (val, limit, msg) {
-		if (!(val > limit)) {
-			return msg ? helpers.formatStr(msg, limit) : helpers.formatStr('be greater than {}', limit);
-		}
-	},
-
-	bt: function (val, lower, upper, msg) {
-		if (!(val > lower && val < upper)) {
-			return msg ? helpers.formatStr(msg, lower, upper) : helpers.formatStr('be between {} and {}', lower, upper);
-		}
-	},
-
-	lte: function (val, limit, msg) {
-		if (!(val <= limit)) {
-			return msg ? helpers.formatStr(msg, limit) : helpers.formatStr('be less than or equal to {}', limit);
-		}
-	},
-
-	gte: function (val, limit, msg) {
-		if (!(val >= limit)) {
-			return msg ? helpers.formatStr(msg, limit) : helpers.formatStr('be greater than or equal to ', limit);
-		}
-	},
-
-	email: function (val, msg) {
-		if (!emailReg.test(val)) {
-			return msg || 'be a valid email address';
-		}
-	},
-
-	url: function (val, msg) {
-		if (!urlReg.test(val)) {
-			return msg || 'be a valid url address';
-		}
-	},
-
-	match: function (val, reg, msg) { // TODO add ability to use string regex with modifier
-		if (!reg.test(val)) {
-			return msg || 'match an expression';
-		}
-	},
-
-	notMatch: function (val, reg, msg) { // TODO add ability to use string regex with modifier
-		if (reg.test(val)) {
-			return msg || 'not match an expression';
-		}
-	},
-
-	eq: function (vala, valb, msg) {
-		if (vala != valb) {
-			return msg ? helpers.formatStr(msg, valb) : helpers.formatStr('equal {}', valb);
-		}
-	},
-
-	ip: function (val, msg) {
-		if (!ipReg.test(val)) {
-			return msg || 'be a valid ip address';
-		}
-	},
-
-	alpha: function (val, msg) {
-		if (!alphaReg.test(val)) {
-			return msg || 'only be alphabetic characters';
-		}
-	},
-
-	alphaNumeric: function (val, msg) {
-		if (!alphaNumericReg.test(val)) {
-			return msg || 'only be alphanumeric characters';
-		}
-	},
-
-	date: function (val, msg) {
-		if (isNaN(Date.parse(val))) {
-			return msg || 'be a valid date';
-		}
-	},
-
-	lObj: function (val, msg) {
-		if (val.constructor !== Object) {
-			return msg || 'be an object literal';
-		}
-	}
-
+var regExpTests = {
+	'email': [emailReg, 'be a valid email address'],
+	'url': [urlReg, 'be a valid url address'],
+	'ip': [ipReg, 'be a valid IP address'],
+	'alpha': [alphaReg, 'only be alphabetic characters'],
+	'alphaNumeric': [alphaNumericReg, 'only be alphanumeric characters']
 };
+
+num = validators.num = function (val) {
+	return val !== true && val !== false && exports.manipulators.trim(val) !== '' && isFinite(val) && !isNaN(Number(val));
+};
+num.failMessage = 'be numeric';
+
+lt = validators.lt = function (val, limit) {
+	return val < limit;
+};
+lt.failMessage = 'be less than {1}';
+
+gt = validators.gt = function (val, limit) {
+	return val > limit;
+};
+gt.failMessage = 'be greater than {1}';
+
+bt = validators.bt = function (val, lower, upper) {
+	return val > lower && val < upper;
+};
+bt.failMessage = 'be between {1} and {2}';
+
+lte = validators.lte = function (val, limit) {
+	return val <= limit;
+};
+lte.failMessage = 'be less than or equal to {1}';
+
+gte = validators.gte = function (val, limit) {
+	return val >= limit;
+};
+gte.failMessage = 'be greater than or equal to {1}';
+
+match = validators.match = function (val, reg) {
+	return reg.test(val);
+};
+match.failMessage = 'match an expression';
+
+eq = validators.eq = function (vala, valb) {
+	return vala == valb;
+};
+eq.failMessage = 'equal {1}';
+
+sEq = validators.sEq = function (vala, valb) {
+	return vala === valb;
+};
+sEq.failMessage = 'equal {1}';
+
+date = validators.date = function (val) {
+	return !isNaN(Date.parse(val));
+};
+date.failMessage = 'be a valid date';
+
+lObj = validators.lObj = function (val) {
+	return val && val.constructor === Object;
+};
+lObj.failMessage = 'be an object literal';
+
+sBool = validators.sBool = function (val) {
+	return val === true || val === false;
+};
+sBool.failMessage = 'equal true or false';
 
 var prop;
 
 for (prop in strictTests) {
 	if (strictTests.hasOwnProperty(prop)) {
 		validators[prop] = strictFn.apply(null, strictTests[prop]);
+	}
+}
+
+for (prop in regExpTests) {
+	if (regExpTests.hasOwnProperty(prop)) {
+		validators[prop] = regExpFn.apply(null, regExpTests[prop]);
 	}
 }
 
@@ -165,29 +152,30 @@ var manipulators = exports.manipulators = {
 
 };
 
-manipulators.toDecimal = function (val) {
+toDecimal = manipulators.toDecimal = function (val) {
 	return parseFloat(val);
 };
-manipulators.toDecimal.failVal = isNaN;
-manipulators.toDecimal.failMessage = 'be a decimal';
-manipulators.toInt = function (val, radix) {
+toDecimal.failVal = isNaN;
+toDecimal.failMessage = 'be a decimal';
+
+toInt = manipulators.toInt = function (val, radix) {
 	radix = radix || 10;
 	return parseInt(val, radix);
 };
-manipulators.toInt.failVal = isNaN;
-manipulators.toInt.failMessage = 'be an integer';
+toInt.failVal = isNaN;
+toInt.failMessage = 'be an integer';
 
-manipulators.toNum = function (val) {
+toNum = manipulators.toNum = function (val) {
 	if (manipulators.trim(val) === '') {
 		return NaN;
 	}
 	return Number(val);
 };
-manipulators.toNum.failVal = isNaN;
-manipulators.toNum.failMessage = 'be a number';
+toNum.failVal = isNaN;
+toNum.failMessage = 'be a number';
 
-manipulators.toDate = function (val) {
+toDate = manipulators.toDate = function (val) {
 	return Date.parse(val);
 };
-manipulators.toDate.failVal = isNaN;
-manipulators.toDate.failMessage = 'be a valid date';
+toDate.failVal = isNaN;
+toDate.failMessage = 'be a valid date';

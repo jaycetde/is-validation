@@ -124,6 +124,11 @@ Chain.prototype.resume = function () {
 	return this;
 };
 
+Chain.prototype.not = function () {
+	this._negate = true;
+	return this;
+};
+
 /**
  * Starts Bypassing future tests and manipulations if any errors occured
  *
@@ -213,6 +218,9 @@ Chain.prototype.errorList = function () {
  * @return {string} Human-readable list of errors
  */
 Chain.prototype.errorMessage = function () {
+	if (this.valid()) {
+		return;
+	}
 	var list = this.errorList();
 	return helpers.formatStr(this.errorFormat, this._name, list);
 };
@@ -289,25 +297,34 @@ Is.prototype.that = function (val, name) {
  * Extends Is and Chain with a new test function
  *
  * @param {string} name The name the test will be available by
- * @param {function} fn The test function. Returns undefined on success, error message on failure
+ * @param {function} fn The test function. Returns true or false
  * @return {Is} this
  */
 Is.prototype.addTest = function (name, fn) {
-	Is.prototype[name] = function () {
-		if (typeof(fn.apply(null, arguments)) === "string") {
-			return false;
-		}
-		return true;
-	};
+	Is.prototype[name] = fn;
 	Chain.prototype[name] = function () {
 		if (this._bypass) {
 			return this;
 		}
 		var args = Array.prototype.slice.call(arguments)
-		, response = fn.apply(null, [this._val].concat(args));
-		if (typeof(response) === "string") {
-			this.addError(response);
+			, msg = (this._negate ? 'not ' : '') + fn.failMessage || 'pass ' + name + ' test'
+			, result
+		;
+
+		args = [this._val].concat(args);
+
+		if (args.length > fn.length) {
+			msg = args.pop();
 		}
+
+		result = fn.apply(null, args);
+
+		if ((this._negate && result) || (!this._negate && !result)) {
+			this.addError(helpers.formatStr(msg, args));
+		}
+
+		delete this._negate;
+
 		this._testCount += 1;
 		return this;
 	};
@@ -347,6 +364,9 @@ Is.prototype.addManip = function (name, fn) {
  * @return {array} List of human-readable error messages
  */
 Is.prototype.errorMessages = function () {
+	if (this.valid()) {
+		return;
+	}
 	var i, messages = [];
 	for (i = 0; i < this._registered.length; i += 1) {
 		messages.push(this._registered[i].errorMessage());

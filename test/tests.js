@@ -6,7 +6,7 @@ var testCase = require('nodeunit').testCase
 var tests = {
   num: {
     pass: [[123], [456.789], [-12], [13e5], [-13e-6], ['12'], ['-123.456'], ['2.54e3']],
-    fail: [['hello'], [true], [false], [[]], [{}], ['']]
+    fail: [[NaN], [Infinity], ['hello'], [true], [false], [[]], [{}], ['']]
   },
   lt: {
     pass: [[0, 1], [100, 200], ['a', 'b']],
@@ -40,6 +40,10 @@ var tests = {
 		pass: [['abc', 'abc'], ['123', 123], [true, 1], [false, 0]],
 		fail: [['abc', 'def'], [123, '456'], [true, 0], [false, 1]]
 	},
+	sEq: {
+		pass: [],
+		fail: []
+	},
 	ip: {
 		pass: [['172.16.254.1'], ['0.0.0.0'], ['255.255.255.255']],
 		fail: [['172.16.254.256'], [''], ['abc'], [true], [false], ['300.300.300.300']]
@@ -55,6 +59,34 @@ var tests = {
 	date: {
 		pass: [['Aug 9, 1995'], ['Wed, 09 Aug 1995 00:00:00 GMT'], ['Thu, 01 Jan 1970 00:00:00 GMT-0400'], ['1994-11-05T08:15:30-05:00'], ['1994-11-05T13:15:30Z'], ['1995-09-09'], ['1995-9-9'], ['1995/09/09 10:10:10']],
 		fail: [[1336802400000], ['Aug 32, 1995'], ['notadate']]
+	},
+	lObj: {
+		pass: [[{}], [new Object()], [{ hello: 'world' }]],
+		fail: [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/]]
+	},
+	sStr: {
+		pass: [['abc'], ['123'], ['']],
+		fail: [[123], [true], [{}], [[]], [null], [undefined]]
+	},
+	sNum: {
+		pass: [[0], [123], [1.23e15], [-123.01]],
+		fail: [[''], ['123'], ['abc'], [true], [false], [[]], [{}], [null], [undefined]]
+	},
+	sFn: {
+		pass: [[function () {}], [Math.max]],
+		fail: [[''], ['abc'], [123], [true], [{}], [[]], [null], [undefined]]
+	},
+	sDate: {
+		pass: [[new Date()], [new Date(2013, 2, 12)]],
+		fail: [[''], ['abc'], ['2013-03-12'], [123], [true], [{}], [[]], [null], [undefined]]
+	},
+	sRegExp: {
+		pass: [[/^reg$/], [new RegExp('^reg$', 'g')]],
+		fail: [[''], ['^reg$'], [123], [true], [{}], [[]], [null], [undefined]]
+	},
+	sBool: {
+		pass: [[true], [false]],
+		fail: [[''], [0], [1], ['true'], ['false'], [{}], [[]], [null], [undefined]]
 	}
 };
 
@@ -78,11 +110,11 @@ exports.staticMethods = function (unit) {
     if (tests.hasOwnProperty(test)) {
       
       tests[test].pass.forEach(function (args) {
-        unit.ok(is[test].apply(null, args), test + ' tested against ' + JSON.stringify(args));
+        unit.ok(is[test].apply(null, args), test + ' failed against ' + JSON.stringify(args));
       });
 
       tests[test].fail.forEach(function (args) {
-        unit.ok(!is[test].apply(null, args), test + ' tested against ' + JSON.stringify(args));
+        unit.ok(!is[test].apply(null, args), test + ' passed against ' + JSON.stringify(args));
       });
 
     }
@@ -247,6 +279,22 @@ exports.throwing = function (unit) {
 		c2.toInt().gt(0);
 		c2.throwErr();
 	});
+
+	unit.done();
+
+};
+
+exports.negate = function (unit) {
+
+	is.clear();
+
+	is.that('abc').not().num().sStr();
+
+	unit.ok(is.valid());
+
+	is.that(123).not().num();
+
+	unit.ok(!is.valid());
 
 	unit.done();
 
