@@ -48,7 +48,7 @@ var Is = function () {
  */
 var Chain = function (val, name) {
 
-	this._val = val;
+	this._val = helpers.cloneObj(val); // uses cloneObj to prevent affecting original objects through reference
 	this._name = name;
 
 	this.clear();
@@ -79,6 +79,7 @@ Chain.prototype.propFormat = "have a {0} which must {1}";
 Chain.prototype.prop = function (prop, name) {
 	var p = new Chain(this._val[prop], name || prop);
 	p._up = this;
+	p._propName = prop;
 	this._registered.push(p);
 	if (this._bypass || typeof(this._val[prop]) === "undefined") {
 		p._bypass = true;
@@ -145,12 +146,25 @@ Chain.prototype.up = function () {
 };
 
 /**
+ * Rebuilds current value by replacing the properties with manipulated values
+ *
+ * @return {Chain} this
+ */
+Chain.prototype.constructProps = function () {
+	var i, l = this._registered.length;
+	for (i = 0; i < l; i += 1) {
+		this._val[this._registered[i]._propName] = this._registered[i].val();
+	}
+	return this;
+};
+
+/**
  * Get the current manipulated value
  * 
  * @return {Object} The manipulated value
  */
 Chain.prototype.val = function () {
-	return this._val;
+	return this.constructProps()._val;
 };
 
 /**

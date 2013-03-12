@@ -118,6 +118,12 @@ var validators = exports.validators = {
 		if (isNaN(Date.parse(val))) {
 			return msg || 'be a valid date';
 		}
+	},
+
+	lObj: function (val, msg) {
+		if (val.constructor !== Object) {
+			return msg || 'be an object literal';
+		}
 	}
 
 };

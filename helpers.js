@@ -27,3 +27,18 @@ exports.stringListJoin = function (arr) {
 
 };
 
+exports.cloneObj = function (obj) {
+
+	if (!(obj instanceof RegExp) && Object(obj) === obj) {
+		var prop, clone = new obj.constructor();
+		for (prop in obj) {
+			if (obj.hasOwnProperty(prop)) {
+				clone[prop] = obj[prop];
+			}
+		}
+		return clone;
+	}
+
+	return obj;	// Object must be basic type (String, Number, Boolean, Undefined or Null)
+
+};
