@@ -1,5 +1,11 @@
 **Library for chaining validation and manipulation together**
 
+This library is brand new and still under development. The API is still
+changing and much of the library is untested.
+
+This library provides a convienient way of validating and converting input
+while providing easy to read and informative error messages if it fails.
+
 ## Examples
 
 ```javascript
@@ -39,6 +45,22 @@ chain.testCount();                    // 4
 is.testCount();                       // 6
 
 is.clear();
+
+```
+
+Error messages are more informative than simply stating 'invalid input'
+
+```javascript
+
+is.that('$ab', 'Your username')
+        .sStr()
+        .alpha()                      // fails
+        .prop('length')
+                .gt(5)                // fails
+                .lt(15);
+
+is.errorMessages();
+// ['Your username must only be alphabetic characters and have a length which must be greater than 5']
 
 ```
 

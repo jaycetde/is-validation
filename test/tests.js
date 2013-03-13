@@ -231,6 +231,20 @@ exports.intCoercion = function (unit) {
 	
 };
 
+exports.properties = function (unit) {
+	
+	is.clear();
+	
+	var c1 = is.that('abc');
+	var c2 = c1.prop('length');
+	
+	unit.equal(c1.val(), 'abc');
+	unit.equal(c2.val(), 3);
+	
+	unit.done();
+	
+};
+
 exports.manipulation = function (unit) {
 	
 	is.clear();

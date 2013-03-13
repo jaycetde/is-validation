@@ -62,13 +62,38 @@ var Chain = function (val, name) {
  * {0}: val name
  * {1}: constructed error list
  */
-Chain.prototype.errorFormat = "{0} must {1}";
+Chain.prototype._errorFormat = "{0} must {1}";
 /**
  * Default error format for non-top-level chains
  * {0}: val name
  * {1}: constructed error list
  */
-Chain.prototype.propFormat = "have a {0} which must {1}";
+Chain.prototype._propFormat = "have a {0} which must {1}";
+
+/**
+ * Changes the format of the error message returned
+ * {0} - The variables name
+ * {1} - The list of errors
+ *
+ * @return {Chain} this
+ */
+Chain.prototype.errorFormat = function (format) {
+	this._errorFormat = format;
+	return this;
+};
+
+/**
+ * Change the format of property error segments of the error message
+ * {0} - The property name
+ * {1} - The list of errors
+ *
+ * @return {Chain} this
+ */
+Chain.prototype.propFormat = function (format) {
+	this._propFormat = format;
+	return this;
+};
+
 /**
  * Creates a new chain focused on the property name of current chain
  *
@@ -206,7 +231,7 @@ Chain.prototype.errorList = function () {
 	var i, errs = this._errors.slice(0);
 	for (i = 0; i < this._registered.length; i += 1) {
 		if (this._registered[i].errCount() > 0) {
-			errs.push(helpers.formatStr(this.propFormat, this._registered[i]._name, this._registered[i].errorList()));
+			errs.push(helpers.formatStr(this._propFormat, this._registered[i]._name, this._registered[i].errorList()));
 		}
 	}
 	return helpers.stringListJoin(errs);
@@ -222,7 +247,7 @@ Chain.prototype.errorMessage = function () {
 		return;
 	}
 	var list = this.errorList();
-	return helpers.formatStr(this.errorFormat, this._name, list);
+	return helpers.formatStr(this._errorFormat, this._name, list);
 };
 
 /**
