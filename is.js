@@ -63,6 +63,7 @@ var Chain = function (val, name) {
  * {1}: constructed error list
  */
 Chain.prototype._errorFormat = "{0} must {1}";
+
 /**
  * Default error format for non-top-level chains
  * {0}: val name
@@ -345,7 +346,7 @@ Is.prototype.addTest = function (name, fn) {
 		result = fn.apply(null, args);
 
 		if ((this._negate && result) || (!this._negate && !result)) {
-			this.addError(helpers.formatStr(msg, args));
+			this.addError(helpers.formatStr.apply(null, [msg].concat(args)));
 		}
 
 		delete this._negate;
