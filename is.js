@@ -112,6 +112,7 @@ Chain.prototype.prop = function (prop, name) {
 	}
 	return p;
 };
+
 /**
  * Manipulates the current chain value using a supplied function
  *
@@ -128,6 +129,19 @@ Chain.prototype.manip = function (fn, name) {
 		c._bypass = true;
 	}
 	return c;
+};
+
+/**
+ * default - If the current value is undefined, set it to a default value
+ *
+ * @param {!Object} val The value to set as current
+ * @return {Chain} this
+ */
+Chain.prototype.def = function (val) {
+	if (typeof(this._val) === 'undefined') {
+		this._val = val;
+	}
+	return this;
 };
 
 /**
