@@ -132,13 +132,14 @@ Chain.prototype.manip = function (fn, name) {
 };
 
 /**
- * default - If the current value is undefined, set it to a default value
+ * Replaces the current value if it is equal to the comparator value
  *
  * @param {!Object} val The value to set as current
+ * @param {Object} comparator The value to compare to
  * @return {Chain} this
  */
-Chain.prototype.def = function (val) {
-	if (typeof(this._val) === 'undefined') {
+Chain.prototype.replace = function (val, comparator) {
+	if (this._val === comparator) {
 		this._val = val;
 	}
 	return this;

@@ -87,6 +87,14 @@ var tests = {
 	sBool: {
 		pass: [[true], [false]],
 		fail: [[''], [0], [1], ['true'], ['false'], [{}], [[]], [null], [undefined]]
+	},
+	inside: {
+		pass: [['a', 'abc'], ['values', ['an', 'array', 'of', 'values']]],
+		fail: [['d', 'abc'], ['object', ['an', 'array', 'of', 'values']]]
+	},
+	has: {
+		pass: [['abc', 'length'], [{ hello: 'world' }, 'hello']],
+		fail: [['abc', 'height'], [{ hello: 'world' }, 'length']]
 	}
 };
 

@@ -12,7 +12,7 @@ var emailReg = /^([a-zA-Z0-9!#$%&'*+\/=?\^_`{|}~\-]+|"([a-zA-Z0-9()<>\[\]:,;@\\!
 
 var validators = exports.validators = {};
 
-var num, lt, gt, lte, gte, bt, date, lObj, match, eq, sEq, sBool;
+var num, lt, gt, lte, gte, bt, date, lObj, match, eq, sEq, sBool, inside, has;
 
 var toInt, toDecimal, toDate, toNum;
 
@@ -108,6 +108,16 @@ sBool = validators.sBool = function (val) {
 	return val === true || val === false;
 };
 sBool.failMessage = 'equal true or false';
+
+inside = validators.inside = function (val, arr) {
+	return arr.indexOf(val) !== -1;
+};
+inside.failMessage = 'be inside an array';
+
+has = validators.has = function (val, propName) {
+	return typeof(val[propName]) !== 'undefined';
+};
+has.failMessage = "have a '{1}' property";
 
 var prop;
 
