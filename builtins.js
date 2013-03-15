@@ -157,7 +157,7 @@ var manipulators = exports.manipulators = {
 	},
 
 	toStr: function (val) {
-		return String(val);
+		return (val === undefined || val === null) ? '' : String(val);
 	}
 
 };
