@@ -103,6 +103,18 @@ tests.notMatch = {
 	fail: tests.match.pass
 };
 
+var manipulations = {
+	toStr: [[true, 'true'], [false, 'false'], [123, '123'], ['abc', 'abc'], [undefined, ''], [null, '']],
+	toInt: [[123, 123], ['123', 123], [12.3, 12], ['12.3', 12]], // TODO add tests for NaN
+	toDecimal: [[12.3, 12.3], ['12.3', 12.3]], // TODO add tests for NaN
+	toDate: [], // TODO add tests to check output (cannot check equality of two objects)
+	toNum: [[123, 123], ['123', 123], ['12.3', 12.3]], // TODO add tests for NaN
+	trim: [['  abc  ', 'abc']],
+	ltrim: [['  abc  ', 'abc  ']],
+	rtrim: [['  abc  ', '  abc']],
+	toBool: [['true', true], ['TRUE', true], ['false', false], [1, true], [0, false], ['abc', true], ['', false]]
+};
+
 exports.initializedCorrectly = function (unit) {
   
   unit.ok(is.valid(), "is valid");
@@ -112,7 +124,7 @@ exports.initializedCorrectly = function (unit) {
 
 };
 
-exports.staticMethods = function (unit) {
+exports.staticTests = function (unit) {
 	var test;
   for (test in tests) {
     if (tests.hasOwnProperty(test)) {
@@ -128,6 +140,20 @@ exports.staticMethods = function (unit) {
     }
   }
   unit.done();
+};
+
+exports.staticManipulations = function (unit) {
+	var method;
+	for (method in manipulations) {
+		if (manipulations.hasOwnProperty(method)) {
+			
+			manipulations[method].forEach(function (args) {
+				unit.equal(is[method].call(null, args[0]), args[1]);
+			});
+
+		}
+	}
+	unit.done();
 };
 
 exports.validChains = function (unit) {
