@@ -410,7 +410,9 @@ Is.prototype.errorMessages = function () {
 	}
 	var i, messages = [];
 	for (i = 0; i < this._registered.length; i += 1) {
-		messages.push(this._registered[i].errorMessage());
+		if (!this._registered[i].valid()) {
+			messages.push(this._registered[i].errorMessage());
+		}
 	}
 	return messages;
 };
