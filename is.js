@@ -132,6 +132,28 @@ Chain.prototype.manip = function (fn, name) {
 };
 
 /**
+ * Create and use a single-use test function
+ *
+ * @param {function} fn Accepts the val and returns true / false
+ * @param {string} failMessage Message segment used on failure
+ * @return {Chain} this
+ */
+Chain.prototype.test = function (fn, failMessage) {
+	if (this._bypass) {
+		return this;
+	}
+
+	var result = fn.call(null, this._val);
+
+	if (!result) {
+		this.addError(helpers.formatStr(failMessage, this._val));
+	}
+	
+	this._testCount += 1;
+	return this;
+};
+
+/**
  * Replaces the current value if it is equal to the comparator value
  *
  * @param {!Object} val The value to set as current
@@ -344,18 +366,18 @@ Is.prototype.that = function (val, name) {
 Is.prototype.addTest = function (name, fn) {
 	Is.prototype[name] = fn;
 	Chain.prototype[name] = function () {
-		if (this._bypass) {
+		if (this._bypass) { // Don't run the test if currently set to bypass
 			return this;
 		}
 		var args = Array.prototype.slice.call(arguments)
-			, msg = (this._negate ? 'not ' : '') + fn.failMessage || 'pass ' + name + ' test'
+			, msg = (this._negate ? 'not ' : '') + fn.failMessage || 'pass ' + name + ' test' // compose a default failMessage
 			, result
 		;
 
 		args = [this._val].concat(args);
 
-		if (args.length > fn.length) {
-			msg = args.pop();
+		if (args.length > fn.length) { // More arguments than function accepts
+			msg = args.pop(); // Set failMessage as last argument
 		}
 
 		result = fn.apply(null, args);

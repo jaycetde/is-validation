@@ -191,6 +191,7 @@ exports.invalidChains = function (unit) {
     .lt(10);
 
   unit.equal(is.errCount(), 3);
+	unit.equal(is.errorMessages().length, 2);
 
   unit.done();
 
@@ -343,6 +344,51 @@ exports.negate = function (unit) {
 	is.that(123).not().num();
 
 	unit.ok(!is.valid());
+
+	unit.done();
+
+};
+
+exports.replace = function (unit) {
+
+	is.clear();
+
+	var c1 = is.that() // Using undefined as val
+		.replace('abc'); // Replace undefined with 'abc'
+	
+	unit.equal(c1.val(), 'abc');
+
+	var c2 = is.that('abc')
+		.replace('def');
+	
+	unit.equal(c2.val(), 'abc');
+
+	var c3 = is.that('abc')
+		.replace('def', 'abc');
+	
+	unit.equal(c3.val(), 'def');
+
+	unit.done();
+
+};
+
+exports.singleUseTests = function (unit) {
+
+	is.clear();
+
+	var c1 = is.that(2)
+		.test(function (val) { // Even test
+			return val % 2 === 0;
+		}, 'be even');
+	
+	unit.ok(c1.valid());
+
+	var c2 = is.that(2)
+		.test(function (val) {
+			return val % 2 === 1;
+		}, 'be odd');
+	
+	unit.ok(!c2.valid());
 
 	unit.done();
 
