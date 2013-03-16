@@ -33,12 +33,12 @@ var regExpFn = function (reg, defaultMessage) {
 };
 
 var strictTests = {
-	'sStr': ['String', 'be a string'],
+	'str': ['String', 'be a string'],
 	'sNum': ['Number', 'be a number'],
-	'sFn': ['Function', 'be a function'],
-	'sArgs': ['Arguments', 'be arguments'],
+	'fn': ['Function', 'be a function'],
+	'args': ['Arguments', 'be arguments'],
 	'sDate': ['Date', 'be a date'],
-	'sRegExp': ['RegExp', 'be a regular expression']
+	'regExp': ['RegExp', 'be a regular expression']
 };
 
 var regExpTests = {

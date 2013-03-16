@@ -64,7 +64,7 @@ var tests = {
 		pass: [[{}], [new Object()], [{ hello: 'world' }]],
 		fail: [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/]]
 	},
-	sStr: {
+	str: {
 		pass: [['abc'], ['123'], ['']],
 		fail: [[123], [true], [{}], [[]], [null], [undefined]]
 	},
@@ -72,7 +72,7 @@ var tests = {
 		pass: [[0], [123], [1.23e15], [-123.01]],
 		fail: [[''], ['123'], ['abc'], [true], [false], [[]], [{}], [null], [undefined]]
 	},
-	sFn: {
+	fn: {
 		pass: [[function () {}], [Math.max]],
 		fail: [[''], ['abc'], [123], [true], [{}], [[]], [null], [undefined]]
 	},
@@ -80,7 +80,7 @@ var tests = {
 		pass: [[new Date()], [new Date(2013, 2, 12)]],
 		fail: [[''], ['abc'], ['2013-03-12'], [123], [true], [{}], [[]], [null], [undefined]]
 	},
-	sRegExp: {
+	regExp: {
 		pass: [[/^reg$/], [new RegExp('^reg$', 'g')]],
 		fail: [[''], ['^reg$'], [123], [true], [{}], [[]], [null], [undefined]]
 	},
@@ -337,7 +337,7 @@ exports.negate = function (unit) {
 
 	is.clear();
 
-	is.that('abc').not().num().sStr();
+	is.that('abc').not().num().str();
 
 	unit.ok(is.valid());
 
