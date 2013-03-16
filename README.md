@@ -1,4 +1,4 @@
-	**Library for chaining validation and manipulation together**
+**Library for chaining validation and manipulation together**
 
 This library is brand new and still under development. The API is still
 changing and much of the library is untested.
