@@ -394,4 +394,31 @@ exports.singleUseTests = function (unit) {
 
 };
 
+exports.stopIfErr = function (unit) {
+	
+	is.clear();
+
+	var c1 = is.that(123);
+	
+	c1
+		.num()
+		.stopIfErrs();
+	
+	unit.ok(c1.valid());
+
+	c1
+		.lt(10)
+		.stopIfErrs();
+	
+	unit.equal(c1.errCount(), 1);
+
+	c1
+		.gt(200);
+	
+	unit.equal(c1.errCount(), 1);
+
+	unit.done();
+
+};
+
 module.exports = testCase(exports);

@@ -103,11 +103,11 @@ Chain.prototype.propFormat = function (format) {
  * @return {Chain} A new chain focused on property value
  */
 Chain.prototype.prop = function (prop, name) {
-	var p = new Chain(this._val[prop], name || prop);
+	var p = new Chain(this._val[prop], name || prop); // Use property name as name if not specified
 	p._up = this;
 	p._propName = prop;
 	this._registered.push(p);
-	if (this._bypass || typeof(this._val[prop]) === "undefined") {
+	if (this._bypass) { // Continue bypassing
 		p._bypass = true;
 	}
 	return p;
