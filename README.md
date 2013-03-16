@@ -4,7 +4,7 @@ This library is brand new and still under development. The API is still
 changing and much of the library is untested.
 
 This library provides a convienient way of validating and converting input
-while providing easy to read and informative error messages if it fails.
+while providing easy to read and informative error messages.
 
 ## Examples
 
@@ -64,6 +64,11 @@ is.errorMessages();
 
 ```
 
+## Methods:
+
+These methods are available from Is and from all chains. A chain will automatically fill in the first
+argument as its value.
+
 ## Validation methods:
 
 ```javascript
@@ -100,15 +105,107 @@ alphaNumeric(val)        // alphanumeric characters
 
 ```javascript
 
-toInt                    -> Number     // A number with excluding decimals
-toDecimal                -> Number     // A number including decimals
-toDate                   -> Date       // Parse a date using Date.parse
-toNum                    -> Number     // A number
+toInt(val)               -> Number     // A number with excluding decimals
+toDecimal(val)           -> Number     // A number including decimals
+toDate(val)              -> Date       // Parse a date using Date.parse
+toNum(val)               -> Number     // A number
 trim(val, [character])   -> String     // Trims specified characters from both sides of val
 ltrim(val, [character])  -> String     // Trims the left side of val
 rtrim(val, [character])  -> String     // Trims the right side of val
-toBool                   -> Boolean    // Boolean
-toStr                    -> String     // String value
+toBool(val)              -> Boolean    // Boolean
+toStr(val)               -> String     // String value
+
+```
+
+## Adding custom validations:
+
+Custom methods should have a failMessage property for use in chain error message construction
+
+```javascript
+
+var even = function (val) {
+	return val % 2 === 0;
+};
+even.failMessage = 'be even';
+
+Is.addTest('even', even);
+
+Is.even(3);              // false
+
+Is.that(3)
+	.even()
+	.valid();              // false
+
+```
+
+## Adding custom manipulations:
+
+If a manipulation method can fail, a failVal and failMessage property should be added to the function.
+The failVal may be a validation function. If the manipulation fails, an error is added and the rest of
+the chain validators and manipulators are bypassed.
+
+```javascript
+
+var multiply = function (val, multiplier) {
+	return val * multiplier
+};
+multiply.failVal = isNaN; // Use builtin isNaN function to validate
+multiply.failMessage = 'be a finite number';
+
+Is.addManip('multiply', multiply);
+
+Is.multiply(2, 4);        // 8
+
+Is.that(2)
+	.multiply(4)
+	.val();                 // 8
+
+Is.that('abc')
+	.multiply(4)            // fails with NaN
+	.gt(10)                 // bypasses this and future tests
+	.errCount();            // 1 - only failed multiply method
+
+```
+
+## Is.prototype
+
+```javascript
+
+that = function (val, name);        // Creates a new chain focused on val
+addTest = function (name, fn);      // Adds a validation method to Is and Chain prototype
+addManip = function (name, fn);     // Adds a manipulation method to Is and Chain prototype
+errorMessages = function ();        // Returns an array of error messages, if any
+testCount = function ();            // Returns the number of tests ran in this instance
+errCount = function ();             // Returns the number of errors that have occurred in this instance
+clear = function ();                // Clears out the errors and tests for this instance
+valid = function ();                // Returns true if there are no errors in this instance
+throwErrs = function ();            // Throws an exception if there are any errors. exception.messages = this.errorMessages()
+create = function ();               // Creates and returns a new instance of Is
+
+```
+
+## Chain.prototype
+
+```javascript
+
+errorFormat = function (format);    // set the error format for the chain. Default: '{0} must {1}'
+propFormat = function (format);     // set the property error format for the chain. Default: 'have a {0} which must {1}'
+prop = function (prop, name);       // Create a sub-chain focused on the current values property 'prop'
+manip = function (fn, name);        // Create a sub-chain focused on fn's return value
+test = function (fn, failMessage);  // Runs a test function without adding it to Chain.prototype
+replace = function (val, comparator); // Replaces the current value if it equals the comparator
+stop = function ();                 // Starts bypassing the chain
+resume = function ();               // Stops bypassing the chain and resume testing
+not = function ();                  // Negates the following test. Ex: is.that(123).not().str().valid() -> true
+stopIfErrs = function ();           // Starts bypassing the chain if there are errors
+up = function ();                   // Returns the current chain's parent
+val = function ();                  // Returns the chain's current value
+clear = function ();                // Clears out error and test information
+errorMessage = function ();         // Returns a constructed error message if there are errors
+testCount = function ();            // Returns the number of tests ran in this chain
+errCount = function ();             // Returns the number of errors that have occurred in this chain
+valid = function ();                // Return true if there are no errors in this chain
+throwErr = function ();             // Throws an exception if there are any errors. exception.message = this.errorMessage()
 
 ```
 
