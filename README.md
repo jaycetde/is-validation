@@ -14,12 +14,12 @@ var is = require('is');
 
 // basic usage
 is.num(123);                          // true
-is.gt(123, 100);                      // false
+is.lt(123, 100);                      // false
 
 // simple chaining
 is.that(123)
   .num()
-  .gt(100);
+  .lt(100);
 
 is.valid();                           // false
 is.errCount();                        // 1
