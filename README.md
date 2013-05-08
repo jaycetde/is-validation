@@ -6,7 +6,11 @@ changing and much of the library is untested.
 This library provides a convienient way of validating and converting input
 while providing easy to read and informative error messages.
 
-## Examples
+### Installation
+
+    $ npm install is-validation
+
+### Examples
 
 ```javascript
 
@@ -34,7 +38,7 @@ chain
     .lt(20)
     .up()
   .match(/^[a-z ]+$/i);
-  
+
 chain.valid();                        // true
 is.valid();                           // false (still false from simple chaining example)
 
@@ -64,12 +68,12 @@ is.errorMessages();
 
 ```
 
-## Methods:
+### Methods:
 
 These methods are available from Is and from all chains. A chain will automatically fill in the first
 argument as its value.
 
-## Validation methods:
+### Validation methods:
 
 ```javascript
 
@@ -101,7 +105,7 @@ alphaNumeric(val)        // alphanumeric characters
 
 ```
 
-## Manipulation methods:
+### Manipulation methods:
 
 ```javascript
 
@@ -117,14 +121,14 @@ toStr(val)               -> String     // String value
 
 ```
 
-## Adding custom validations:
+### Adding custom validations:
 
 Custom methods should have a failMessage property for use in chain error message construction
 
 ```javascript
 
 var even = function (val) {
-	return val % 2 === 0;
+    return val % 2 === 0;
 };
 even.failMessage = 'be even';
 
@@ -133,12 +137,12 @@ Is.addTest('even', even);
 Is.even(3);              // false
 
 Is.that(3)
-	.even()
-	.valid();              // false
+    .even()
+    .valid();              // false
 
 ```
 
-## Adding custom manipulations:
+### Adding custom manipulations:
 
 If a manipulation method can fail, a failVal and failMessage property should be added to the function.
 The failVal may be a validation function. If the manipulation fails, an error is added and the rest of
@@ -147,7 +151,7 @@ the chain validators and manipulators are bypassed.
 ```javascript
 
 var multiply = function (val, multiplier) {
-	return val * multiplier
+    return val * multiplier
 };
 multiply.failVal = isNaN; // Use builtin isNaN function to validate
 multiply.failMessage = 'be a finite number';
@@ -157,17 +161,17 @@ Is.addManip('multiply', multiply);
 Is.multiply(2, 4);        // 8
 
 Is.that(2)
-	.multiply(4)
-	.val();                 // 8
+    .multiply(4)
+    .val();                 // 8
 
 Is.that('abc')
-	.multiply(4)            // fails with NaN
-	.gt(10)                 // bypasses this and future tests
-	.errCount();            // 1 - only failed multiply method
+    .multiply(4)            // fails with NaN
+    .gt(10)                 // bypasses this and future tests
+    .errCount();            // 1 - only failed multiply method
 
 ```
 
-## Is.prototype
+### Is.prototype
 
 ```javascript
 
@@ -184,7 +188,7 @@ create = function ();               // Creates and returns a new instance of Is
 
 ```
 
-## Chain.prototype
+### Chain.prototype
 
 ```javascript
 
@@ -208,8 +212,6 @@ valid = function ();                // Return true if there are no errors in thi
 throwErr = function ();             // Throws an exception if there are any errors. exception.message = this.errorMessage()
 
 ```
-
-This library is not yet on [npm](http://github.com/isaacs/npm)
 
 More documentation will be available soon. In the meantime, look through the source code
 and test file
