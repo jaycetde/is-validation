@@ -10,6 +10,9 @@
   },
   "keywords": ["is", "validation", "manipulation"],
   "dependencies": {},
+  "devDependencies": {
+      "nodeunit": "*"
+  },
   "engines": {
     "node": "*"
   },

@@ -3,5 +3,6 @@
 *~
 *.out
 
-# Allow node_modules to be downloaded via git submodule init
 node_modules/
+
+.c9revisions
