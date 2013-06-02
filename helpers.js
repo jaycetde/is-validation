@@ -7,7 +7,7 @@ exports.formatStr = function () {
   return str.replace(/\{([0-9]*)\}/g, function (m, argI) {
 		argI = argI || i;
 		i += 1;
-    return typeof(args[argI]) !== 'undefined' ? args[argI] : '';
+    return String(args[argI]);
   });
 };
 
