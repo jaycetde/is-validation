@@ -16,5 +16,5 @@
   "engines": {
     "node": "*"
   },
-  "main": "is.js"
+  "main": "lib/is.js"
 }

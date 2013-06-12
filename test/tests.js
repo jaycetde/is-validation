@@ -1,7 +1,7 @@
 'use strict';
 
 var testCase = require('nodeunit').testCase
-	, is = require('../is');
+	, is = require('../lib/is');
 
 var tests = {
   num: {

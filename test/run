@@ -3,7 +3,8 @@
 try {
 
 	var nodeunit = require('nodeunit')
-	, assertExtras = require('./assert-extras');
+	  , assertExtras = require('./assert-extras')
+    ;
 
 } catch (e) {
 	console.log("Cannot find necessary modules.");
