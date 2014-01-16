@@ -1,217 +1,605 @@
-**Library for chaining validation and manipulation together**
+## is-validation
 
-This library is brand new and still under development. The API is still
-changing and much of the library is untested.
+Library for chaining validation and manipulation together
+
+**This library is brand new and still under development. The API is still
+changing.**
 
 This library provides a convienient way of validating and converting input
 while providing easy to read and informative error messages.
 
-### Installation
-
-    $ npm install is-validation
-
-### Examples
+### Example
 
 ```javascript
 
 var is = require('is');
 
-// basic usage
-is.num(123);                          // true
-is.lt(123, 100);                      // false
+// static validation usage
+is.number(123);
+// true
+is.lessThan(123, 100);
+// false
 
 // simple chaining
-is.that(123)
-  .num()
-  .lt(100);
+is(123)
+  .number()
+  .lessThan(100)
+;
 
-is.valid();                           // false
-is.errCount();                        // 1
-is.testCount();                       // 2
+is.valid;
+// false
+is.errorCount;
+// 1
+is.testCount;
+// 2
 
 // complex chaining
-var chain = is.that("hello world");
+var chain = is("hello world");
 chain
-  .str()
-  .prop('length')
-    .gt(10)
-    .lt(20)
-    .up()
-  .match(/^[a-z ]+$/i);
+  .string()
+  .property('length')
+    .greaterThan(10)
+    .lessThan(20)
+    .up() // go back to parent chain
+  .match(/^[a-z ]+$/i)
+;
 
-chain.valid();                        // true
-is.valid();                           // false (still false from simple chaining example)
+chain.valid;
+// true
+is.valid;
+// false (still false from simple chaining example)
 
-chain.errCount();                     // 0
-is.errCount();                        // 1
+chain.errorCount;
+// 0
+is.errorCount;
+// 1
 
-chain.testCount();                    // 4
-is.testCount();                       // 6
+chain.testCount;
+// 4
+is.testCount;
+// 6
 
 is.clear();
 
+is.valid;
+// true
+is.testCount;
+// 0
+is.errorCount;
+// 0
+
 ```
 
-Error messages are more informative than simply stating 'invalid input'
+### Installation
+
+    $ npm install is-validation
+    
+### API
+
+#### is(val, [ name ])
+
+Registers a new Chain to `is`
+
+* val - The subject of the chain
+* name - The name to be used in error messages
+
+returns a new Chain instance
+
+#### is.a is.an
+
+returns `is`
 
 ```javascript
 
-is.that('$ab', 'Your username')
-        .str()
-        .alpha()                      // fails
-        .prop('length')
-                .gt(5)                // fails
-                .lt(15);
+is.a.string('abc');
+// true
 
-is.errorMessages();
+is === is.a.an;
+// true
+
+```
+
+#### is.valid
+
+Returns false if any registered Chain has any errors
+
+#### is.testCount
+
+Returns the total number of tests of all registered Chains
+
+#### is.errorCount
+
+Returns the total number of errors of all registered Chains
+
+#### is.errorMessages
+
+Returns an array of error messages from all registered Chains
+
+#### is.clear()
+
+Clears out all registered Chains
+
+returns `is`
+
+#### is.throwErrors()
+
+If `is.valid` is false, throw `is.errorMessages` as an Exception
+
+#### is.configure.addValidator(name, fn, [ options ])
+
+Add a validator to `is` and the Chain prototype
+
+* name - The name the validator may be accessed through
+* fn - The validation function. Returns true on valid, false on not valid
+* options
+  * failMessage - The error message for if the validation fails (default: 'pass ' + name + ' test')
+
+```javascript
+
+is.configure.addValidator('odd', function (val) {
+    return val % 2 === 1;
+}, { failMessage: 'be odd' });
+
+is.odd(3);
+// true
+
+is(2).odd().errorMessage;
+// 'value must be odd'
+
+```
+
+#### is.configure.addManipulator(name, fn, [ options ])
+
+Add a manipulator to `is` and the Chain prototype
+
+* name - The name the manipulator may be access through
+* fn - The manipulation function. Returns the manipulated value
+* options
+  * failVal - A value or function to compare to the manipulated value to indicate failure. If not set, the manipulation cannot fail
+  * failMessage - The error message for if the manipulation fails (default: 'be able to be manipulated by ' + name)
+
+```javascript
+
+is.configure.addManipulator('toExponent', function (val, exp) {
+    return Math.pow(val, exp);
+}, { failVal: isNaN, failMessage: 'be a number' });
+
+is.toExponent(5, 2);
+// 25
+
+is('abc').toExponent(2).errorMessage;
+// 'value must be a number'
+
+```
+
+#### is.METHOD(val, args*)
+
+All validation and manipulation methods are available as properties of is.
+
+```javascript
+
+is.string('abc');
+// true
+
+is.lessThan(123, 100);
+// false
+
+```
+
+#### Chain(val, [ name ])
+
+#### Chain.a Chain.an Chain.and
+
+returns `this`
+
+#### Chain.not
+
+Negates the next test
+
+returns `this`
+
+```javascript
+
+is('abc').not.a.number().valid;
+// true
+
+```
+
+#### Chain.value
+
+Returns the manipulated subject of the Chain
+
+#### Chain.valid
+
+Returns true if no errors have occured on the chain
+
+#### Chain.testCount
+
+Returns the number of tests that have occured on the chain
+
+#### Chain.errorCount
+
+Returns the number of errors that have occured on the chain
+
+#### Chain.errorMessage
+
+Returns a composed error message describing all the tests that have failed on the chain
+
+#### Chain.clear();
+
+Clears out all tests on the chain
+
+returns `this`
+
+#### Chain.property(propName, [ name ])
+
+Creates a new Chain with the current chains property `propName` as the subject
+
+* propName - the property to use as the new subject
+* name - the name to be used in the error message. (default: `propName`)
+
+```javascript
+
+is('abc')
+  .a.string()
+  .property('length', 'total number of characters')
+    .greaterThan(5)
+    .lessThan(10)
+    .up()
+  .errorMessage;
+// 'value must have a total number of characters which must be greater than 5'
+
+```
+
+#### Chain.ifValid()
+
+Starts bypassing validations and manipulations if the chain is not valid
+
+#### Chain.stop()
+
+Starts bypassing validations and manipulations on the chain
+
+#### Chain.resume()
+
+Stops bypassing validations and manipulations on the chain
+
+#### Chain.up()
+
+Returns the parent chain if it exists
+
+```javascript
+
+var chain = is('abc')
+  , length = chain.property('length')
+;
+
+chain === length;
+// false
+
+chain === length.up();
+// true
+
+```
+
+#### Chain.throwError()
+
+Throws an exception if the chain is not valid
+
+#### Chain.validate(fn, failMessage)
+
+Run a one time validation in the chain
+
+* fn - The validation function. Returns `true` on success, `false` on failure
+* failMessage - The error message if the validation fails
+
+```javascript
+
+is(123)
+  .validate(function (val) {
+      return val % 2 === 0;
+  }, 'be even')
+  .errorMessage;
+// 'value must be even'
+
+```
+
+#### Chain.manipulate(fn, [ name ])
+
+Run a one time manipulation in the chain
+
+* fn - The manipulation function. Returns the manipulated value
+* name - The name of the manipulated value
+
+returns `this`
+
+```javascript
+
+is(123)
+  .manipulate(function (val) {
+      return val * val;
+  }, 'value squared')
+    .value;
+// 15129
+
+```
+
+#### Chain.errorFormat(format)
+
+Replace the chains error format with `format`
+
+* format - a string to represent how error messages are displayed
+
+The default format is '{0} must {1}' where {0} is the name of the chain subject and {1} is the list of error messages
+
+#### Chain.propFormat(format)
+
+Replace the chain property format with `format`
+
+* format - a string to represent how properties are formatted in error messages
+
+The default format is 'have a {0} which must {1}' where {0} is the name of the property and {1} is the list of error messages for the property
+
+### Error Messages // TODO - revise this
+
+Error messages are customizable and more informative than simply stating 'invalid input'
+
+```javascript
+
+is('$ab', 'Your username')
+  .string()
+  .match(/^[a-z]*$/i, 'only be alphabetic characters')  // fails
+  .property('length')
+    .greaterThan(5)  // fails
+    .lessThan(15)
+;
+
+is.errorMessages;
 // ['Your username must only be alphabetic characters and have a length which must be greater than 5']
 
 ```
 
-### Methods:
 
-These methods are available from Is and from all chains. A chain will automatically fill in the first
-argument as its value.
+### Built-in Validation
 
-### Validation methods:
+#### string(val)
+
+Is `val` a string object
+
+#### number(val)
+
+Is `val` numeric. NaN, Infinity, true, false, and '' are not numeric
+
+#### strictNumber(val)
+
+Is `val` a number object
+
+#### lessThan(val, limit)
+
+Simple less than comparison: `return val < limit`
+
+#### lessThanEqual(val, limit)
+
+Simple less than or equal comparison: `return val <= limit`
+
+#### greaterThan(val, limit)
+
+Simple greater than comparison: `return val > limit`
+
+#### greaterThanEqual(val, limit)
+
+Simple greater than or equal comparison: `return val > limit`
+
+#### between(val, lower, upper)
+
+Exclusive comparison: `return val > lower && val < upper`
+
+#### within(val, lower, upper)
+
+Inclusive comparison: `return val >= lower && val <= upper`
+
+#### equal(val, expected)
+
+Uses [deep-is](https://github.com/thlorenz/deep-is) to compare objects
+
+#### strictEqual(val, expected)
+
+Simple strict equality comparison: `return val === expected`
+
+#### strictBoolean(val)
+
+`val` must equal true or false
+
+#### date(val)
+
+Can `val` be parsed into a date
+
+#### strictDate(val)
+
+Is `val` a Date object
+
+#### literalObject(val)
+
+Check if `val` is an object literal
+
+`{}`           - true
+`new Object()` - true
+`[]`           - false
+
+#### inside(val, arr)
+
+Check for the existance of `val` in an array or string
+
+#### haveProperty(val, propName)
+
+Does `val` have a property `propName`
+
+#### haveOwnProperty(val, propName)
+
+Does `val` have its own property `propNam`
+
+#### match(val, regExp)
+
+Compares `val` to a regular expression
+
+#### function(val)
+
+Is `val` a function
+
+#### args(val)
+
+Is `val` an arguments object
+
+#### regExp(val)
+
+Is `val` a regular expression
+
+#### instanceOf(val, constructor)
+
+Is `val` an instance of constructor
+
+#### array(val)
+
+Is `val` an array
+
+#### buffer(val)
+
+Is `val` a Buffer object
+
+#### empty(val)
+
+Is `val` empty
+
+* array, arguments, and string - true if val.length === 0
+* null, undefined - true
+* object - true if it has no properties of its own
+
+
+
+### Built-in Manipulation
+
+#### toString(val)
+
+Returns a string representation of `val`
+
+* undefined and null - returns an empty string ('')
+* object literal - returns JSON.stringify(val)
+* everything else - returns String(val)
+
+Cannot fail
+
+#### trim(val, [ chars ])
+
+Trims characters from both side of `val`. It will convert `val` to a string using `is.toString`
+
+* chars - the characters to trim from the sides (default: '\\r\\n\\t\\s' - whitespace characters)
+
+Cannot fail
+
+#### leftTrim(val, [ chars ])
+
+Trims characters from the left side of `val`. It will convert `val` to a string using `is.toString`
+
+* chars - the characters to trim from the left side (default: '\\r\\n\\t\\s' - whitespace characters)
+
+Cannot fail
+
+#### rightTrim(val, [ chars ])
+
+Trims characters from the right side of `val`. It will convert `val` to a string using `is.toString`
+
+* chars - the characters to trim from the right side (default: '\\r\\n\\t\\s' - whitespace characters)
+
+Cannot fail
+
+#### toNumber(val)
+
+Parse `val` into a number
+
+An empty string ('') returns NaN. Everything else is parsed by `Number(val)`
+
+* failVal - isNaN
+* failMessage - 'be a number'
+
+#### toInteger(val, [ radix ])
+
+Use parseInt to parse `val`
+
+* radix - the radix to use in parseInt (default: 10)
+
+* failVal - isNaN
+* failMessage - 'be an integer'
+
+#### toFloat(val)
+
+Use parseFloat to parse `val`
+
+* failVal - isNaN
+* failMessage - 'be a floating point number'
+
+#### toBoolean(val)
+
+Converts `val` into true or false
+
+'', '0', 'false', and falsy objects will be converted to false.  Everything else will be true.
+
+Cannot fail
+
+#### toDate(val)
+
+Converts `val` into a Date object
+
+null, undefined, and boolean values return NaN
+
+* failVal - isNaN
+* failMessage - 'be a valid date'
+
+#### toRegExp(val)
+
+Converts `val` into a regular expression
+
+It will convert RegExp.toString() back into a RegExp. All other strings will not have flags
 
 ```javascript
 
-str(val)                 // string
-num(val)                 // numeric
-lt(val, limit)           // less than
-gt(val, limit)           // greater than
-lte(val, limit)          // less than or equal
-gte(val, limit)          // greater than or equal
-bt(val, lower, upper)    // between
-date(val)
-lObj(val)                // literal object ( {} || new Object )
-match(val, regexp)       // matches a Regular Expression
-eq(val, valb)            // equal (val == valb)
-sEq(val, valb)           // strict equal (val === valb)
-sBool(val)               // strict boolean
-inside(val, obj)         // in array or string
-has(val, propName)       // val has property 'propName'
-sNum(val)                // strict number
-fn(val)                  // function
-args(val)                // arguments
-sDate(val)               // strict date
-regExp(val)              // regular expression
-email(val)               // valid email
-url(val)                 // valid url
-ip(val)                  // valid ip address
-alpha(val)               // alphabetic characters
-alphaNumeric(val)        // alphanumeric characters
+var reg = /^hello$/gi
+  , str = reg.toString() // '/^hello$/gi'
+;
+
+is.toRegExp(str);
+// /^hello$/gi
+
+is.toRegExp('^helloE');
+// /^hello$/
 
 ```
 
-### Manipulation methods:
+* failVal - null
+* failMessage - 'be a regular expression'
+
+#### default(val, newVal, compare)
+
+Replaces `val` with `newVal` if it equals `compare`
+
+`compare` may also be a function which returns true to replace the values
 
 ```javascript
 
-toInt(val)               -> Number     // A number with excluding decimals
-toDecimal(val)           -> Number     // A number including decimals
-toDate(val)              -> Date       // Parse a date using Date.parse
-toNum(val)               -> Number     // A number
-trim(val, [character])   -> String     // Trims specified characters from both sides of val
-ltrim(val, [character])  -> String     // Trims the left side of val
-rtrim(val, [character])  -> String     // Trims the right side of val
-toBool(val)              -> Boolean    // Boolean
-toStr(val)               -> String     // String value
+is.default('abc', 'def', 'abc');
+// 'def'
+
+is.default(123, 0, isNaN);
+// 123
+
+is.default(undefined, '') // `compare` is undefined. Its value is `undefined`
+// ''
+
+is('abc')
+  .toNumber()        // converts 'abc' to NaN
+  .default(0, isNaN) // replaces NaN with 0
+  .clear()           // clear out errors from `toNumber()`
+  .value;              // return the value
+// 0
 
 ```
 
-### Adding custom validations:
-
-Custom methods should have a failMessage property for use in chain error message construction
-
-```javascript
-
-var even = function (val) {
-    return val % 2 === 0;
-};
-even.failMessage = 'be even';
-
-Is.addTest('even', even);
-
-Is.even(3);              // false
-
-Is.that(3)
-    .even()
-    .valid();              // false
-
-```
-
-### Adding custom manipulations:
-
-If a manipulation method can fail, a failVal and failMessage property should be added to the function.
-The failVal may be a validation function. If the manipulation fails, an error is added and the rest of
-the chain validators and manipulators are bypassed.
-
-```javascript
-
-var multiply = function (val, multiplier) {
-    return val * multiplier
-};
-multiply.failVal = isNaN; // Use builtin isNaN function to validate
-multiply.failMessage = 'be a finite number';
-
-Is.addManip('multiply', multiply);
-
-Is.multiply(2, 4);        // 8
-
-Is.that(2)
-    .multiply(4)
-    .val();                 // 8
-
-Is.that('abc')
-    .multiply(4)            // fails with NaN
-    .gt(10)                 // bypasses this and future tests
-    .errCount();            // 1 - only failed multiply method
-
-```
-
-### Is.prototype
-
-```javascript
-
-that = function (val, name);        // Creates a new chain focused on val
-addTest = function (name, fn);      // Adds a validation method to Is and Chain prototype
-addManip = function (name, fn);     // Adds a manipulation method to Is and Chain prototype
-errorMessages = function ();        // Returns an array of error messages, if any
-testCount = function ();            // Returns the number of tests ran in this instance
-errCount = function ();             // Returns the number of errors that have occurred in this instance
-clear = function ();                // Clears out the errors and tests for this instance
-valid = function ();                // Returns true if there are no errors in this instance
-throwErrs = function ();            // Throws an exception if there are any errors. exception.messages = this.errorMessages()
-create = function ();               // Creates and returns a new instance of Is
-
-```
-
-### Chain.prototype
-
-```javascript
-
-errorFormat = function (format);    // set the error format for the chain. Default: '{0} must {1}'
-propFormat = function (format);     // set the property error format for the chain. Default: 'have a {0} which must {1}'
-prop = function (prop, name);       // Create a sub-chain focused on the current values property 'prop'
-manip = function (fn, name);        // Create a sub-chain focused on fn's return value
-test = function (fn, failMessage);  // Runs a test function without adding it to Chain.prototype
-replace = function (val, comparator); // Replaces the current value if it equals the comparator
-stop = function ();                 // Starts bypassing the chain
-resume = function ();               // Stops bypassing the chain and resume testing
-not = function ();                  // Negates the following test. Ex: is.that(123).not().str().valid() -> true
-stopIfErrs = function ();           // Starts bypassing the chain if there are errors
-up = function ();                   // Returns the current chain's parent
-val = function ();                  // Returns the chain's current value
-clear = function ();                // Clears out error and test information
-errorMessage = function ();         // Returns a constructed error message if there are errors
-testCount = function ();            // Returns the number of tests ran in this chain
-errCount = function ();             // Returns the number of errors that have occurred in this chain
-valid = function ();                // Return true if there are no errors in this chain
-throwErr = function ();             // Throws an exception if there are any errors. exception.message = this.errorMessage()
-
-```
-
-More documentation will be available soon. In the meantime, look through the source code
-and test file
+Cannot fail

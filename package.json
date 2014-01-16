@@ -2,19 +2,23 @@
   "name": "is-validation",
   "description": "Input validation and manipulation library",
   "author": "Jayce Pulsipher <jaycemp@gmail.com>",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/JayceTDE/is-validation"
   },
-  "keywords": ["is", "validation", "manipulation"],
-  "dependencies": {},
-  "devDependencies": {
-      "nodeunit": "*"
+  "keywords": [
+      "is",
+      "validation",
+      "manipulation"
+  ],
+  "dependencies": {
+      "deep-is": "*"
   },
-  "engines": {
-    "node": "*"
+  "devDependencies": {
+      "mocha": "*",
+      "should": "*"
   },
   "main": "lib/is.js"
 }
