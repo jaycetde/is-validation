@@ -205,6 +205,36 @@ is('abc').not.a.number().valid;
 
 ```
 
+#### Chain.or
+
+Simple `or` condition
+
+If the validation before `.or` or the validation after passes, then the chain is considered valid
+
+```javascript
+
+is(123)
+  .a.string().or
+    .a.number()
+  .valid;
+// true
+
+is(123)
+  .a.string().or
+    .an.array().or
+    .a.regExp()
+  .errorMessage;
+// 'value must be a string, be an array, or be a regular expression'
+
+```
+
+The behavior of `or` may be a little strange, and I am open to suggestions:
+
+* All `or` tests after a valid test will be skipped
+* All errors in a set of `or`s count as 1 error in `.errorCount`
+* Only the tests that are performed until a valid test count towards `.testCount` (I might set all `or` tests to count as 1)
+* There is no grouping of tests (yet - let me know if this is desired). `or` will only work with single tests
+
 #### Chain.value
 
 Returns the manipulated subject of the Chain

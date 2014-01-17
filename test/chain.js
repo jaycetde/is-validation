@@ -153,6 +153,46 @@ describe('Chain', function () {
         
     });
     
+    it('should use `or` properly', function () {
+        
+        chain.clear();
+        
+        chain
+          .a.string().or
+            .a.number()
+        ;
+        
+        chain.valid.should.be.true;
+        chain.testCount.should.equal(2);
+        
+        chain.clear();
+        
+        chain
+          .a.number().or
+            .a.string().or
+            .an.array().or
+            .a.buffer()
+        ;
+        
+        chain.valid.should.be.true;
+        chain.testCount.should.equal(1);
+        
+        chain.clear();
+        
+        chain
+          .a.string().or
+            .an.array().or
+            .a.buffer()
+        ;
+        
+        chain.valid.should.be.false;
+        chain.testCount.should.equal(3);
+        chain.errorCount.should.equal(1);
+        
+        chain.errorMessage.should.equal('value must be a string, be an array, or be a buffer');
+        
+    });
+    
     it('should stop testing when using `ifValid', function () {
         
         chain.clear();

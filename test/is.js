@@ -89,6 +89,26 @@ describe('is', function () {
             
         });
         
+        it('should throw an exception if trying to add a new validator with the same name as another property', function () {
+            
+            var oldString = is.string;
+            
+            (function () {
+                is.configure.addValidator('string', function () {});
+            }).should.throw();
+            
+            (function () {
+                is.configure.addManipulator('and', function () {});
+            }).should.throw();
+            
+            (function () {
+                is.configure.addValidator('errorMessages', function () {});
+            }).should.throw();
+            
+            is.string.should.equal(oldString);
+            
+        });
+        
     });
     
 });

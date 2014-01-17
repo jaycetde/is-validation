@@ -257,4 +257,16 @@ describe('built-in manipulators', function () {
       ]
     );
     
+    test(
+        'default'
+      , [
+          [[undefined, 123], 123]
+        , [['hello', 123, 'hello'], 123]
+        , [[NaN, 123, isNaN], 123]
+        , [[123, 'abc', isNaN], 123]
+        , [['abc', 123, true], 'abc']
+      ]
+      , []
+    );
+    
 });
