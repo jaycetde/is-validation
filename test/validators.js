@@ -3,6 +3,8 @@ var is = require('..')
   , should = require('should')
 ;
 
+function Instance() {}
+
 function test(method, pass, fail) {
     
     describe(method, function () {
@@ -173,10 +175,18 @@ describe('built-in validators', function () {
       , [[''], [0], [1], ['true'], ['false'], [{}], [[]], [null], [undefined]]
     );
     
+    var instance = new Instance();
+    
+    test(
+        'object'
+      , [[{}], [new Object()], [{ hello: 'world' }], [instance]]
+      , [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/]]
+    );
+    
     test(
         'literalObject'
       , [[{}], [new Object()], [{ hello: 'world' }]]
-      , [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/]]
+      , [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/], [instance]]
     );
     
     test(
