@@ -179,8 +179,8 @@ describe('built-in validators', function () {
     
     test(
         'object'
-      , [[{}], [new Object()], [{ hello: 'world' }], [instance]]
-      , [['abc'], [123], [true], [false], [undefined], [null], [[1,2,3]], [/^reg$/]]
+      , [[{}], [new Object()], [{ hello: 'world' }], [instance], [[1,2,3]], [/^reg$/]]
+      , [['abc'], [123], [true], [false], [undefined], [null]]
     );
     
     test(

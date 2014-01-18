@@ -447,6 +447,10 @@ Can `val` be parsed into a date
 
 Is `val` a Date object
 
+#### object(val)
+
+Is `val` an object
+
 #### literalObject(val)
 
 Check if `val` is an object literal
@@ -454,6 +458,7 @@ Check if `val` is an object literal
 `{}`           - true
 `new Object()` - true
 `[]`           - false
+`new Date()`   - false
 
 #### inside(val, arr)
 
