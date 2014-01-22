@@ -2,7 +2,7 @@
   "name": "is-validation",
   "description": "Input validation and manipulation library",
   "author": "Jayce Pulsipher <jaycemp@gmail.com>",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": "MIT",
   "repository": {
     "type": "git",
