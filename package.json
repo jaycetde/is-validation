@@ -2,7 +2,7 @@
   "name": "is-validation",
   "description": "Input validation and manipulation library",
   "author": "Jayce Pulsipher <jaycemp@gmail.com>",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "license": "MIT",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
       "manipulation"
   ],
   "dependencies": {
-      "congruent": "*",
+      "deepequal": "*",
       "is-args": "*"
   },
   "devDependencies": {
