@@ -1,14 +1,9 @@
-## is-validation
+# is-validation
 
 Library for chaining validation and manipulation together
 
-**This library is brand new and still under development. The API is still
-changing.**
-
-This library provides a convienient way of validating and converting input
+It provides a convienient way of validating and converting input
 while providing easy to read and informative error messages.
-
-### Example
 
 ```javascript
 
@@ -70,13 +65,18 @@ is.errorCount;
 
 ```
 
-### Installation
+## Installation
 
     $ npm install is-validation
-    
-### API
 
-#### is(val, [ name ])
+## Dependencies
+
+  - [deepequal](https://npmjs.org/package/deepequal)
+  - [is-args](https://npmjs.org/package/is-args)
+    
+## API
+
+### is(val, [ name ])
 
 Registers a new Chain to `is`
 
@@ -85,7 +85,7 @@ Registers a new Chain to `is`
 
 returns a new Chain instance
 
-#### is.a is.an
+### is.a is.an
 
 returns `is`
 
@@ -99,33 +99,33 @@ is === is.a.an;
 
 ```
 
-#### is.valid
+### is.valid
 
 Returns false if any registered Chain has any errors
 
-#### is.testCount
+### is.testCount
 
 Returns the total number of tests of all registered Chains
 
-#### is.errorCount
+### is.errorCount
 
 Returns the total number of errors of all registered Chains
 
-#### is.errorMessages
+### is.errorMessages
 
 Returns an array of error messages from all registered Chains
 
-#### is.clear()
+### is.clear()
 
 Clears out all registered Chains
 
 returns `is`
 
-#### is.throwErrors()
+### is.throwErrors()
 
 If `is.valid` is false, throw `is.errorMessages` as an Exception
 
-#### is.configure.addValidator(name, fn, [ options ])
+### is.configure.addValidator(name, fn, [ options ])
 
 Add a validator to `is` and the Chain prototype
 
@@ -148,7 +148,7 @@ is(2).odd().errorMessage;
 
 ```
 
-#### is.configure.addManipulator(name, fn, [ options ])
+### is.configure.addManipulator(name, fn, [ options ])
 
 Add a manipulator to `is` and the Chain prototype
 
@@ -172,7 +172,7 @@ is('abc').toExponent(2).errorMessage;
 
 ```
 
-#### is.METHOD(val, args*)
+### is.METHOD(val, args*)
 
 All validation and manipulation methods are available as properties of is.
 
@@ -186,13 +186,13 @@ is.lessThan(123, 100);
 
 ```
 
-#### Chain(val, [ name ])
+### Chain(val, [ name ])
 
-#### Chain.a Chain.an Chain.and
+### Chain.a Chain.an Chain.and
 
 returns `this`
 
-#### Chain.not
+### Chain.not
 
 Negates the next test
 
@@ -205,7 +205,7 @@ is('abc').not.a.number().valid;
 
 ```
 
-#### Chain.or
+### Chain.or
 
 Simple `or` condition
 
@@ -235,33 +235,33 @@ The behavior of `or` may be a little strange, and I am open to suggestions:
 * Only the tests that are performed until a valid test count towards `.testCount` (I might set all `or` tests to count as 1)
 * There is no grouping of tests (yet - let me know if this is desired). `or` will only work with single tests
 
-#### Chain.value
+### Chain.value
 
 Returns the manipulated subject of the Chain
 
-#### Chain.valid
+### Chain.valid
 
 Returns true if no errors have occured on the chain
 
-#### Chain.testCount
+### Chain.testCount
 
 Returns the number of tests that have occured on the chain
 
-#### Chain.errorCount
+### Chain.errorCount
 
 Returns the number of errors that have occured on the chain
 
-#### Chain.errorMessage
+### Chain.errorMessage
 
 Returns a composed error message describing all the tests that have failed on the chain
 
-#### Chain.clear();
+### Chain.clear();
 
 Clears out all tests on the chain
 
 returns `this`
 
-#### Chain.property(propName, [ name ])
+### Chain.property(propName, [ name ])
 
 Creates a new Chain with the current chains property `propName` as the subject
 
@@ -281,19 +281,19 @@ is('abc')
 
 ```
 
-#### Chain.ifValid()
+### Chain.ifValid()
 
 Starts bypassing validations and manipulations if the chain is not valid
 
-#### Chain.stop()
+### Chain.stop()
 
 Starts bypassing validations and manipulations on the chain
 
-#### Chain.resume()
+### Chain.resume()
 
 Stops bypassing validations and manipulations on the chain
 
-#### Chain.up()
+### Chain.up()
 
 Returns the parent chain if it exists
 
@@ -311,11 +311,11 @@ chain === length.up();
 
 ```
 
-#### Chain.throwError()
+### Chain.throwError()
 
 Throws an exception if the chain is not valid
 
-#### Chain.validate(fn, failMessage)
+### Chain.validate(fn, failMessage)
 
 Run a one time validation in the chain
 
@@ -333,7 +333,7 @@ is(123)
 
 ```
 
-#### Chain.manipulate(fn, [ name ])
+### Chain.manipulate(fn, [ name ])
 
 Run a one time manipulation in the chain
 
@@ -353,7 +353,7 @@ is(123)
 
 ```
 
-#### Chain.errorFormat(format)
+### Chain.errorFormat(format)
 
 Replace the chains error format with `format`
 
@@ -361,7 +361,7 @@ Replace the chains error format with `format`
 
 The default format is '{0} must {1}' where {0} is the name of the chain subject and {1} is the list of error messages
 
-#### Chain.propFormat(format)
+### Chain.propFormat(format)
 
 Replace the chain property format with `format`
 
@@ -369,7 +369,7 @@ Replace the chain property format with `format`
 
 The default format is 'have a {0} which must {1}' where {0} is the name of the property and {1} is the list of error messages for the property
 
-### Error Messages // TODO - revise this
+## Error Messages
 
 Error messages are customizable and more informative than simply stating 'invalid input'
 
@@ -389,69 +389,69 @@ is.errorMessages;
 ```
 
 
-### Built-in Validation
+## Built-in Validation
 
-#### string(val)
+### string(val)
 
 Is `val` a string object
 
-#### number(val)
+### number(val)
 
 Is `val` numeric. NaN, Infinity, true, false, and '' are not numeric
 
-#### strictNumber(val)
+### strictNumber(val)
 
 Is `val` a number object
 
-#### lessThan(val, limit)
+### lessThan(val, limit)
 
 Simple less than comparison: `return val < limit`
 
-#### lessThanEqual(val, limit)
+### lessThanEqual(val, limit)
 
 Simple less than or equal comparison: `return val <= limit`
 
-#### greaterThan(val, limit)
+### greaterThan(val, limit)
 
 Simple greater than comparison: `return val > limit`
 
-#### greaterThanEqual(val, limit)
+### greaterThanEqual(val, limit)
 
 Simple greater than or equal comparison: `return val > limit`
 
-#### between(val, lower, upper)
+### between(val, lower, upper)
 
 Exclusive comparison: `return val > lower && val < upper`
 
-#### within(val, lower, upper)
+### within(val, lower, upper)
 
 Inclusive comparison: `return val >= lower && val <= upper`
 
-#### equal(val, expected)
+### equal(val, expected)
 
 Uses [deep-is](https://github.com/thlorenz/deep-is) to compare objects
 
-#### strictEqual(val, expected)
+### strictEqual(val, expected)
 
 Simple strict equality comparison: `return val === expected`
 
-#### strictBoolean(val)
+### strictBoolean(val)
 
 `val` must equal true or false
 
-#### date(val)
+### date(val)
 
 Can `val` be parsed into a date
 
-#### strictDate(val)
+### strictDate(val)
 
 Is `val` a Date object
 
-#### object(val)
+### object(val)
 
 Is `val` an object
 
-#### literalObject(val)
+### literalObject(val)
 
 Check if `val` is an object literal
 
@@ -460,47 +460,47 @@ Check if `val` is an object literal
 `[]`           - false
 `new Date()`   - false
 
-#### inside(val, arr)
+### inside(val, arr)
 
 Check for the existance of `val` in an array or string
 
-#### haveProperty(val, propName)
+### haveProperty(val, propName)
 
 Does `val` have a property `propName`
 
-#### haveOwnProperty(val, propName)
+### haveOwnProperty(val, propName)
 
 Does `val` have its own property `propNam`
 
-#### match(val, regExp)
+### match(val, regExp)
 
 Compares `val` to a regular expression
 
-#### function(val)
+### function(val)
 
 Is `val` a function
 
-#### args(val)
+### args(val)
 
 Is `val` an arguments object
 
-#### regExp(val)
+### regExp(val)
 
 Is `val` a regular expression
 
-#### instanceOf(val, constructor)
+### instanceOf(val, constructor)
 
 Is `val` an instance of constructor
 
-#### array(val)
+### array(val)
 
 Is `val` an array
 
-#### buffer(val)
+### buffer(val)
 
 Is `val` a Buffer object
 
-#### empty(val)
+### empty(val)
 
 Is `val` empty
 
@@ -510,9 +510,9 @@ Is `val` empty
 
 
 
-### Built-in Manipulation
+## Built-in Manipulation
 
-#### toString(val)
+### toString(val)
 
 Returns a string representation of `val`
 
@@ -522,7 +522,7 @@ Returns a string representation of `val`
 
 Cannot fail
 
-#### trim(val, [ chars ])
+### trim(val, [ chars ])
 
 Trims characters from both side of `val`. It will convert `val` to a string using `is.toString`
 
@@ -530,7 +530,7 @@ Trims characters from both side of `val`. It will convert `val` to a string usin
 
 Cannot fail
 
-#### leftTrim(val, [ chars ])
+### leftTrim(val, [ chars ])
 
 Trims characters from the left side of `val`. It will convert `val` to a string using `is.toString`
 
@@ -538,7 +538,7 @@ Trims characters from the left side of `val`. It will convert `val` to a string 
 
 Cannot fail
 
-#### rightTrim(val, [ chars ])
+### rightTrim(val, [ chars ])
 
 Trims characters from the right side of `val`. It will convert `val` to a string using `is.toString`
 
@@ -546,7 +546,7 @@ Trims characters from the right side of `val`. It will convert `val` to a string
 
 Cannot fail
 
-#### toNumber(val)
+### toNumber(val)
 
 Parse `val` into a number
 
@@ -555,7 +555,7 @@ An empty string ('') returns NaN. Everything else is parsed by `Number(val)`
 * failVal - isNaN
 * failMessage - 'be a number'
 
-#### toInteger(val, [ radix ])
+### toInteger(val, [ radix ])
 
 Use parseInt to parse `val`
 
@@ -564,14 +564,14 @@ Use parseInt to parse `val`
 * failVal - isNaN
 * failMessage - 'be an integer'
 
-#### toFloat(val)
+### toFloat(val)
 
 Use parseFloat to parse `val`
 
 * failVal - isNaN
 * failMessage - 'be a floating point number'
 
-#### toBoolean(val)
+### toBoolean(val)
 
 Converts `val` into true or false
 
@@ -579,7 +579,7 @@ Converts `val` into true or false
 
 Cannot fail
 
-#### toDate(val)
+### toDate(val)
 
 Converts `val` into a Date object
 
@@ -588,7 +588,7 @@ null, undefined, and boolean values return NaN
 * failVal - isNaN
 * failMessage - 'be a valid date'
 
-#### toRegExp(val)
+### toRegExp(val)
 
 Converts `val` into a regular expression
 
@@ -611,7 +611,7 @@ is.toRegExp('^helloE');
 * failVal - null
 * failMessage - 'be a regular expression'
 
-#### default(val, newVal, compare)
+### default(val, newVal, compare)
 
 Replaces `val` with `newVal` if it equals `compare`
 
@@ -638,3 +638,12 @@ is('abc')
 ```
 
 Cannot fail
+
+## Limitations
+
+  - This library is brand new and still under development. The API is still
+  changing.
+  - Type-checking will not work across multiple frames or through REPL. I
+  chose not to use the slower `Object.prototype.toString` method of type
+  checking.
+  - All validation and manipulation methods must be synchronous
