@@ -1,4 +1,4 @@
-# is-validation
+# is-validation [![Build Status](https://travis-ci.org/JayceTDE/is-validation.png)](https://travis-ci.org/JayceTDE/is-validation)
 
 Library for chaining validation and manipulation together
 
