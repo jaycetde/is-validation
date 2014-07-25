@@ -1,3 +1,9 @@
+## 1.0.7 (2014-07-25)
+
+Features:
+
+  - export ValidationException for use in try-catch blocks
+
 ## 1.0.6 (2014-01-26)
 
 Features:

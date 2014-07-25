@@ -71,7 +71,7 @@ describe('is', function () {
             
             is('abc').a.number();
             
-            is.throwErrors.should.throw();
+            is.throwErrors.should.throw(is.ValidationsException);
             
         });
         
