@@ -1,3 +1,9 @@
+## 1.0.8 (2017-09-09)
+
+Bugfix:
+
+  - fix property of undefined exceptions
+
 ## 1.0.7 (2014-07-25)
 
 Features:
