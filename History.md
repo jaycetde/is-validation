@@ -1,3 +1,9 @@
+## 1.0.9 (2017-09-10)
+
+Bugfix:
+
+  - Chain.clear not resetting all flags
+
 ## 1.0.8 (2017-09-09)
 
 Bugfix:
